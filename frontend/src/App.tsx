@@ -2,7 +2,7 @@ import React, { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Link, useNavigate, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { HelmetProvider } from 'react-helmet-async';
-import { ClerkProvider, SignedIn, SignedOut, SignInButton, useAuth } from '@clerk/clerk-react';
+import { ClerkProvider, SignedIn, SignedOut, SignInButton, useAuth, useUser } from '@clerk/clerk-react';
 import { Toaster } from 'react-hot-toast';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider } from './contexts/AuthContext';
@@ -82,7 +82,8 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
 }
 
 function AdminGuard({ children }: { children: React.ReactNode }) {
-  const { user, isLoaded } = useAuth();
+  const { isLoaded } = useAuth();
+  const { user } = useUser();
   if (!isLoaded) return <LoadingSpinner />;
   const isAdmin = (user as any)?.publicMetadata?.role === 'admin';
   if (!isAdmin) return <Navigate to="/" />;
