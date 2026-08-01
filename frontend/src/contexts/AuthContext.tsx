@@ -34,7 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refreshUser = useCallback(async () => {
     try {
       if (isSignedIn && clerkUser) {
-        const token = await clerkUser.getToken();
+        const token = await (clerkUser as any).getToken();
         if (token) {
           localStorage.setItem('clerkToken', token);
         }
@@ -91,7 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         user,
         isGuest: user?.isGuest || false,
-        isAuthenticated: !!user || isSignedIn,
+        isAuthenticated: !!user || !!isSignedIn,
         isAdmin: (clerkUser as any)?.publicMetadata?.role === 'admin' || user?.role === 'admin',
         loading: loading || !clerkLoaded,
         loginAsGuest,

@@ -25,7 +25,7 @@ api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
     config.headers['Authorization'] = `Bearer ${clerkToken}`;
   }
 
-  config.metadata = { ...config.metadata, startTime: Date.now() };
+  (config as any).metadata = { ...(config as any).metadata, startTime: Date.now() };
   return config;
 });
 
