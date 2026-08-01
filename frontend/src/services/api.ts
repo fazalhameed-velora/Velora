@@ -241,12 +241,16 @@ export const authAPI = {
 export const userAPI = {
   getProfile: () => api.get('/users/profile'),
   updateProfile: (data: any) => api.put('/users/profile', data),
+  deleteMyAccount: () => api.delete('/users/profile'),
   addAddress: (data: any) => api.post('/users/addresses', data),
   updateAddress: (id: string, data: any) => api.put(`/users/addresses/${id}`, data),
   deleteAddress: (id: string) => api.delete(`/users/addresses/${id}`),
   toggleWishlist: (productId: string) => api.post(`/users/wishlist/${productId}`),
   getWishlist: () => api.get('/users/wishlist'),
   getAll: (params?: Record<string, string>) => api.get('/users', { params }),
+  getById: (id: string) => api.get(`/users/${id}`),
+  update: (id: string, data: any) => api.put(`/users/${id}`, data),
+  delete: (id: string) => api.delete(`/users/${id}`),
 };
 
 // Analytics

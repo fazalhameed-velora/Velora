@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Package, Heart, MapPin } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Package, Heart, MapPin, AlertTriangle, Trash2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { userAPI, orderAPI } from '../../services/api';
 import { Order, Address } from '../../types';
@@ -11,9 +11,13 @@ import { Badge, EmptyState, Modal } from '../../components/ui/Common';
 import notify from '../../utils/notifications';
 
 function UserProfile() {
-  const { user, refreshUser } = useAuth();
+  const { user, refreshUser, logout } = useAuth();
+  const navigate = useNavigate();
   const [form, setForm] = useState({ name: '', phone: '' });
   const [saving, setSaving] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState('');
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (user) setForm({ name: user.name, phone: user.phone || '' });
@@ -27,6 +31,23 @@ function UserProfile() {
       notify.success('Profile Updated', { description: 'Your profile has been saved successfully.' });
     } catch (e: any) { notify.error('Update Failed', { description: e.message }); }
     finally { setSaving(false); }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirm !== 'DELETE') return;
+    setDeleting(true);
+    try {
+      await userAPI.deleteMyAccount();
+      notify.success('Account Deleted', { description: 'Your account has been permanently deleted.' });
+      logout();
+      navigate('/');
+    } catch (e: any) {
+      notify.error('Delete Failed', { description: e.message });
+    } finally {
+      setDeleting(false);
+      setShowDeleteModal(false);
+      setDeleteConfirm('');
+    }
   };
 
   return (
@@ -49,6 +70,81 @@ function UserProfile() {
           <Button onClick={handleSave} isLoading={saving}>Save Changes</Button>
         </div>
       </div>
+
+      {/* Danger Zone */}
+      <div className="bg-white dark:bg-surface-900 rounded-2xl border-2 border-red-200 dark:border-red-900/50 p-6 max-w-lg">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-900/20 flex items-center justify-center">
+            <AlertTriangle size={20} className="text-red-500" />
+          </div>
+          <div>
+            <h3 className="font-bold text-red-600 dark:text-red-400">Danger Zone</h3>
+            <p className="text-sm text-surface-500">Permanent account deletion</p>
+          </div>
+        </div>
+        <p className="text-sm text-surface-600 dark:text-surface-400 mb-4">
+          Once you delete your account, there is no going back. All your data, orders, and preferences will be permanently removed.
+        </p>
+        <Button variant="danger" onClick={() => setShowDeleteModal(true)}>
+          <Trash2 size={16} /> Delete My Account
+        </Button>
+      </div>
+
+      {/* Delete Confirmation Modal */}
+      <Modal isOpen={showDeleteModal} onClose={() => { setShowDeleteModal(false); setDeleteConfirm(''); }} title="Delete Account">
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 p-4 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800">
+            <AlertTriangle size={24} className="text-red-500 flex-shrink-0" />
+            <div>
+              <p className="font-bold text-red-600 dark:text-red-400">This action is irreversible</p>
+              <p className="text-sm text-red-500/80">Your account and all associated data will be permanently deleted.</p>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-surface-700 dark:text-surface-300">
+              This will permanently delete:
+            </p>
+            <ul className="text-sm text-surface-500 space-y-1 ml-4 list-disc">
+              <li>Your profile and account information</li>
+              <li>Your order history</li>
+              <li>Your saved addresses</li>
+              <li>Your wishlist</li>
+            </ul>
+          </div>
+          <div className="p-4 bg-surface-50 dark:bg-surface-800 rounded-xl">
+            <p className="text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
+              Type <span className="font-bold text-red-500">DELETE</span> to confirm:
+            </p>
+            <input
+              type="text"
+              value={deleteConfirm}
+              onChange={(e) => setDeleteConfirm(e.target.value)}
+              placeholder="Type DELETE"
+              className="w-full h-10 px-3 rounded-xl border border-red-200 dark:border-red-800 bg-white dark:bg-surface-900 text-sm focus:ring-2 focus:ring-red-500"
+            />
+          </div>
+        </div>
+        <div className="flex justify-end gap-3 mt-6">
+          <Button variant="outline" onClick={() => { setShowDeleteModal(false); setDeleteConfirm(''); }}>Cancel</Button>
+          <button
+            onClick={handleDeleteAccount}
+            disabled={deleteConfirm !== 'DELETE' || deleting}
+            className="px-5 py-2.5 bg-red-600 hover:bg-red-700 disabled:bg-red-300 disabled:cursor-not-allowed text-white rounded-xl font-medium transition-colors flex items-center gap-2"
+          >
+            {deleting ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                Deleting...
+              </>
+            ) : (
+              <>
+                <Trash2 size={16} />
+                Permanently Delete Account
+              </>
+            )}
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 }
