@@ -89,7 +89,7 @@ export default function CheckoutPage() {
         total,
       });
 
-      const whatsappNumber = process.env.REACT_APP_WHATSAPP_NUMBER || '923001234567';
+      const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '923001234567';
       window.open(`https://wa.me/${whatsappNumber}?text=${whatsappMsg}`, '_blank');
 
       clearCart();

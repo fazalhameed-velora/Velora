@@ -52,7 +52,7 @@ export default class ErrorBoundary extends Component<Props, State> {
             <p className="text-surface-500 mb-2">
               An unexpected error occurred while rendering this page.
             </p>
-            {process.env.NODE_ENV === 'development' && this.state.error && (
+            {import.meta.env.MODE === 'development' && this.state.error && (
               <details className="mt-4 mb-6 text-left">
                 <summary className="text-sm text-surface-400 cursor-pointer hover:text-surface-600 transition-colors">
                   Error Details (Development)

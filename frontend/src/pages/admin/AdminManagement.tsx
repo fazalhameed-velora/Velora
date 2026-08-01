@@ -792,3 +792,5 @@ function AdminAnalytics() {
 }
 
 export { AdminCategories, AdminBrands, AdminOrders, AdminCoupons, AdminBanners, AdminUsers, AdminAnalytics };
+
+export default { AdminCategories, AdminBrands, AdminOrders, AdminCoupons, AdminBanners, AdminUsers, AdminAnalytics };

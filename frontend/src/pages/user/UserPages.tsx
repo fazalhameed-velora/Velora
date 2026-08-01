@@ -311,3 +311,5 @@ function UserAddresses() {
 }
 
 export { UserProfile, UserOrders, UserWishlist, UserAddresses };
+
+export default { UserProfile, UserOrders, UserWishlist, UserAddresses };

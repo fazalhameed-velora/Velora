@@ -1,8 +1,8 @@
-import React, { Suspense, lazy, useEffect } from 'react';
+import { Suspense, lazy, useEffect, type ReactNode } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Link, useNavigate, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { HelmetProvider } from 'react-helmet-async';
-import { ClerkProvider, SignedIn, SignedOut, SignInButton, useAuth, useUser } from '@clerk/react';
+import { ClerkProvider, SignedIn, SignedOut, SignInButton, useAuth, useUser } from '@clerk/clerk-react';
 import { Toaster } from 'react-hot-toast';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider } from './contexts/AuthContext';
@@ -14,6 +14,8 @@ import AdminLayout from './components/layout/AdminLayout';
 import ErrorBoundary from './components/ui/ErrorBoundary';
 import CookieConsent from './components/ui/CookieConsent';
 import session from './utils/session';
+import { AdminCategories, AdminBrands, AdminOrders, AdminCoupons, AdminBanners, AdminUsers, AdminAnalytics } from './pages/admin/AdminManagement';
+import { UserProfile, UserOrders, UserWishlist, UserAddresses } from './pages/user/UserPages';
 
 const HomePage = lazy(() => import('./pages/home/HomePage'));
 const ShopPage = lazy(() => import('./pages/shop/ShopPage'));
@@ -21,10 +23,9 @@ const ProductDetailPage = lazy(() => import('./pages/product/ProductDetailPage')
 const CartPage = lazy(() => import('./pages/cart/CartPage'));
 const CheckoutPage = lazy(() => import('./pages/checkout/CheckoutPage'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
-const { AdminProducts, AdminCategories, AdminBrands, AdminOrders, AdminCoupons, AdminBanners, AdminUsers, AdminAnalytics } = require('./pages/admin/AdminManagement');
-const { UserProfile, UserOrders, UserWishlist, UserAddresses } = require('./pages/user/UserPages');
+const AdminProducts = lazy(() => import('./pages/admin/AdminProducts'));
 
-const CLERK_PUBLISHABLE_KEY = process.env.REACT_APP_CLERK_PUBLISHABLE_KEY || '';
+const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || '';
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, retry: 1, staleTime: 5 * 60 * 1000 } },
@@ -49,7 +50,7 @@ function LoadingSpinner() {
   );
 }
 
-function ClerkAuthCheck({ children }: { children: React.ReactNode }) {
+function ClerkAuthCheck({ children }: { children: ReactNode }) {
   return (
     <>
       <SignedIn>{children}</SignedIn>
@@ -73,7 +74,7 @@ function ClerkAuthCheck({ children }: { children: React.ReactNode }) {
   );
 }
 
-function AdminRoute({ children }: { children: React.ReactNode }) {
+function AdminRoute({ children }: { children: ReactNode }) {
   return (
     <ClerkAuthCheck>
       <AdminGuard>{children}</AdminGuard>
@@ -81,7 +82,7 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
   );
 }
 
-function AdminGuard({ children }: { children: React.ReactNode }) {
+function AdminGuard({ children }: { children: ReactNode }) {
   const { isLoaded } = useAuth();
   const { user } = useUser();
   if (!isLoaded) return <LoadingSpinner />;
@@ -90,7 +91,7 @@ function AdminGuard({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-function UserRoute({ children }: { children: React.ReactNode }) {
+function UserRoute({ children }: { children: ReactNode }) {
   return <ClerkAuthCheck>{children}</ClerkAuthCheck>;
 }
 
@@ -162,7 +163,7 @@ function AppRoutes() {
 
 function App() {
   if (!CLERK_PUBLISHABLE_KEY) {
-    console.error('Missing REACT_APP_CLERK_PUBLISHABLE_KEY');
+    console.error('Missing VITE_CLERK_PUBLISHABLE_KEY');
   }
 
   return (
