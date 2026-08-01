@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Plus, Edit, Trash2, Search, UserX, UserCheck, Shield, ShieldOff, MoreVertical, Eye } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, UserX, UserCheck, Shield, ShieldOff, MoreVertical, Eye, ShoppingBag, TrendingUp } from 'lucide-react';
 import { categoryAPI, brandAPI, couponAPI, bannerAPI, orderAPI, userAPI } from '../../services/api';
 import { Category, Brand, Coupon, Banner } from '../../types';
 import Button from '../../components/ui/Button';
