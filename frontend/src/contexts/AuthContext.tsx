@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import { useAuth as useClerkAuth, useUser } from '@clerk/clerk-react';
+import { useAuth as useClerkAuth, useUser } from '@clerk/react';
 import { User } from '../types';
 import { userAPI, authAPI } from '../services/api';
 

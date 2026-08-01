@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Search, ShoppingCart, Heart, User, Menu, X, Sun, Moon, Package, LogOut, ChevronDown } from 'lucide-react';
-import { SignInButton, SignedIn, SignedOut, useUser, useClerk } from '@clerk/clerk-react';
+import { SignInButton, SignedIn, SignedOut, useUser, useClerk } from '@clerk/react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';

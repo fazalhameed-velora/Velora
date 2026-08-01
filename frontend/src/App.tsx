@@ -2,7 +2,7 @@ import React, { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Link, useNavigate, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { HelmetProvider } from 'react-helmet-async';
-import { ClerkProvider, SignedIn, SignedOut, SignInButton, useAuth, useUser } from '@clerk/clerk-react';
+import { ClerkProvider, SignedIn, SignedOut, SignInButton, useAuth, useUser } from '@clerk/react';
 import { Toaster } from 'react-hot-toast';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider } from './contexts/AuthContext';
