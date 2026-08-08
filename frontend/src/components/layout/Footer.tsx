@@ -37,11 +37,7 @@ export default function Footer() {
     className="w-9 h-9 object-contain rounded-xl transition-transform duration-200 group-hover:scale-105"
   />
 
-  <span className="text-xl font-extrabold tracking-tight">
-    <span className="bg-gradient-to-r from-primary-600 via-primary-500 to-primary-700 bg-clip-text text-transparent">
-      elo
-    </span>
-    <span className="text-surface-900 dark:text-white">ra</span>
+  <span className="text-xl font-bold text-white">Velora</span>
   </span>
 </Link>
             <p className="text-sm text-surface-400 mb-4">Your one-stop shop for the latest tech accessories and gadgets.</p>
