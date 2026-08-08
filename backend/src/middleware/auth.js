@@ -14,6 +14,18 @@ const User = require('../models/User');
  */
 const protect = async (req, res, next) => {
   try {
+    // Debug logging
+    const hasAuthHeader = !!req.headers.authorization;
+    const hasClerkAuth = !!(req.auth && req.auth.userId);
+    
+    console.log(`[AUTH DEBUG] Route: ${req.method} ${req.path}`);
+    console.log(`[AUTH DEBUG] Authorization header present: ${hasAuthHeader}`);
+    console.log(`[AUTH DEBUG] req.auth.userId present: ${hasClerkAuth}`);
+    
+    if (hasClerkAuth) {
+      console.log(`[AUTH DEBUG] Clerk userId: ${req.auth.userId}`);
+    }
+    
     // Check for Clerk authenticated user first (highest priority)
     // req.auth is populated by clerkMiddleware() from @clerk/express
     if (req.auth && req.auth.userId) {
@@ -21,6 +33,8 @@ const protect = async (req, res, next) => {
       
       // Find or create user in MongoDB
       let user = await User.findOne({ clerkId });
+      
+      console.log(`[AUTH DEBUG] MongoDB user found: ${!!user}`);
       
       if (!user) {
         // Auto-create user from Clerk data if not exists
@@ -32,6 +46,7 @@ const protect = async (req, res, next) => {
           avatar: req.headers['x-user-avatar'] || '',
           role: 'user', // Default role - admin must be set manually in MongoDB
         });
+        console.log(`[AUTH DEBUG] Created new user: ${user._id}`);
       }
       
       req.user = user;
@@ -40,6 +55,8 @@ const protect = async (req, res, next) => {
     
     // Check for guest user (lower priority than Clerk)
     const guestId = req.headers['x-guest-id'];
+    console.log(`[AUTH DEBUG] x-guest-id present: ${!!guestId}`);
+    
     if (guestId) {
       let guest = await User.findOne({ guestId, isGuest: true });
       if (!guest) {
@@ -55,9 +72,11 @@ const protect = async (req, res, next) => {
     }
     
     // No authentication found
+    console.log(`[AUTH DEBUG] No authentication found - returning 401`);
     return res.status(401).json({ success: false, message: 'Not authorized' });
   } catch (error) {
     console.error('[AUTH] Error in protect middleware:', error.message);
+    console.error('[AUTH] Error stack:', error.stack);
     return res.status(401).json({ success: false, message: 'Not authorized' });
   }
 };
