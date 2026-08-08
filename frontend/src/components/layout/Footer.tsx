@@ -37,7 +37,7 @@ export default function Footer() {
     className="w-9 h-9 object-contain rounded-xl transition-transform duration-200 group-hover:scale-105"
   />
 
-  <span className="text-xl font-bold text-white">Velora</span>
+  <span className="text-xl font-bold text-white">elora</span>
 </Link>
             <p className="text-sm text-surface-400 mb-4">Your one-stop shop for the latest tech accessories and gadgets.</p>
             <div className="flex flex-col gap-2 text-sm text-surface-400">
