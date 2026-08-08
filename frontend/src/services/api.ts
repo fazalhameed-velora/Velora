@@ -1,6 +1,7 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import session from '../utils/session';
 import notify from '../utils/notifications';
+import { getFreshToken } from '../contexts/AuthContext';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -20,9 +21,16 @@ api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
   const guestId = localStorage.getItem('guestId');
   if (guestId) config.headers['x-guest-id'] = guestId;
 
-  const clerkToken = localStorage.getItem('clerkToken');
-  if (clerkToken) {
-    config.headers['Authorization'] = `Bearer ${clerkToken}`;
+  // Get fresh Clerk token for authenticated requests
+  try {
+    const token = await getFreshToken();
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
+  } catch (error) {
+    // Token retrieval failed - continue without auth header
+    // This allows public requests to proceed
+    console.warn('[API] Failed to get auth token:', error);
   }
 
   (config as any).metadata = { ...(config as any).metadata, startTime: Date.now() };
@@ -117,10 +125,11 @@ api.interceptors.response.use(
     const url = error.config?.url || 'unknown';
 
     if (status === 401) {
-      localStorage.removeItem('clerkToken');
-      localStorage.removeItem('guestId');
-      session.remove('session_id');
-
+      // Don't clear guest ID on 401 - only clear if it's an auth-related request
+      if (!url.includes('/auth/guest')) {
+        localStorage.removeItem('guestId');
+      }
+      
       if (!window.location.pathname.includes('/admin')) {
         notify.warning('Your session has expired. Please sign in again.', {
           description: 'You\'ll be redirected to the home page.',

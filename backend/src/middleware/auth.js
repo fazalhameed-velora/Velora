@@ -1,24 +1,45 @@
 const User = require('../models/User');
 
+/**
+ * protect middleware - Verifies Clerk authentication or guest session
+ * 
+ * For Clerk users:
+ * - Uses req.auth.userId from @clerk/express middleware (cryptographically verified)
+ * - Looks up MongoDB user by clerkId
+ * - Creates user if not found (auto-sync from Clerk)
+ * 
+ * For guest users:
+ * - Uses x-guest-id header
+ * - Looks up or creates guest user
+ */
 const protect = async (req, res, next) => {
   try {
-    const guestId = req.headers['x-guest-id'];
-    const clerkId = req.headers['x-clerk-id'];
-
-    if (clerkId) {
+    // Check for Clerk authenticated user first (highest priority)
+    // req.auth is populated by clerkMiddleware() from @clerk/express
+    if (req.auth && req.auth.userId) {
+      const clerkId = req.auth.userId;
+      
+      // Find or create user in MongoDB
       let user = await User.findOne({ clerkId });
+      
       if (!user) {
+        // Auto-create user from Clerk data if not exists
+        // This handles cases where Clerk webhook didn't fire or was missed
         user = await User.create({
           clerkId,
-          email: req.headers['x-user-email'] || '',
+          email: req.headers['x-user-email'] || `${clerkId}@clerk.generated`,
           name: req.headers['x-user-name'] || 'User',
           avatar: req.headers['x-user-avatar'] || '',
+          role: 'user', // Default role - admin must be set manually in MongoDB
         });
       }
+      
       req.user = user;
       return next();
     }
-
+    
+    // Check for guest user (lower priority than Clerk)
+    const guestId = req.headers['x-guest-id'];
     if (guestId) {
       let guest = await User.findOne({ guestId, isGuest: true });
       if (!guest) {
@@ -32,13 +53,19 @@ const protect = async (req, res, next) => {
       req.user = guest;
       return next();
     }
-
+    
+    // No authentication found
     return res.status(401).json({ success: false, message: 'Not authorized' });
   } catch (error) {
+    console.error('[AUTH] Error in protect middleware:', error.message);
     return res.status(401).json({ success: false, message: 'Not authorized' });
   }
 };
 
+/**
+ * authorize middleware - Role-based access control
+ * Must be used after protect middleware
+ */
 const authorize = (...roles) => {
   return (req, res, next) => {
     if (!req.user || !roles.includes(req.user.role)) {
@@ -48,18 +75,24 @@ const authorize = (...roles) => {
   };
 };
 
+/**
+ * optionalAuth middleware - Attaches user if available, but doesn't require auth
+ * Used for routes that work with both authenticated and unauthenticated users
+ */
 const optionalAuth = async (req, res, next) => {
   try {
-    const guestId = req.headers['x-guest-id'];
-    const clerkId = req.headers['x-clerk-id'];
-
-    if (clerkId) {
-      req.user = await User.findOne({ clerkId });
-    } else if (guestId) {
-      req.user = await User.findOne({ guestId, isGuest: true });
+    // Try Clerk auth first
+    if (req.auth && req.auth.userId) {
+      req.user = await User.findOne({ clerkId: req.auth.userId });
+    } else {
+      // Try guest ID
+      const guestId = req.headers['x-guest-id'];
+      if (guestId) {
+        req.user = await User.findOne({ guestId, isGuest: true });
+      }
     }
   } catch (error) {
-    // Continue without user
+    // Continue without user - this is optional auth
   }
   next();
 };

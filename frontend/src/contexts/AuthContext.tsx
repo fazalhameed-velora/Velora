@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
 import { useAuth as useClerkAuth, useUser } from '@clerk/clerk-react';
 import { User } from '../types';
 import { userAPI, authAPI } from '../services/api';
@@ -12,6 +12,7 @@ interface AuthContextType {
   loginAsGuest: () => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
+  getToken: () => Promise<string | null>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -23,21 +24,47 @@ const AuthContext = createContext<AuthContextType>({
   loginAsGuest: async () => {},
   logout: () => {},
   refreshUser: async () => {},
+  getToken: async () => null,
 });
+
+// Module-level token getter that the API interceptor can use
+let globalGetToken: (() => Promise<string | null>) | null = null;
+
+export const getFreshToken = async (): Promise<string | null> => {
+  if (globalGetToken) {
+    return await globalGetToken();
+  }
+  return null;
+};
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const { isSignedIn, isLoaded: clerkLoaded, signOut } = useClerkAuth();
+  const { isSignedIn, isLoaded: clerkLoaded, signOut, getToken: clerkGetToken } = useClerkAuth();
   const { user: clerkUser } = useUser();
+
+  const getToken = useCallback(async (): Promise<string | null> => {
+    try {
+      if (isSignedIn && clerkGetToken) {
+        const token = await clerkGetToken();
+        // Update the global ref so API interceptor can use it
+        globalGetToken = getToken;
+        return token;
+      }
+    } catch (error) {
+      console.error('[Auth] Error getting token:', error);
+    }
+    return null;
+  }, [isSignedIn, clerkGetToken]);
+
+  // Set up global token getter when component mounts
+  useEffect(() => {
+    globalGetToken = getToken;
+  }, [getToken]);
 
   const refreshUser = useCallback(async () => {
     try {
       if (isSignedIn && clerkUser) {
-        const token = await (clerkUser as any).getToken();
-        if (token) {
-          localStorage.setItem('clerkToken', token);
-        }
         const res: any = await userAPI.getProfile();
         if (res.success) {
           setUser(res.data);
@@ -70,7 +97,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(() => {
     localStorage.removeItem('guestId');
-    localStorage.removeItem('clerkToken');
     setUser(null);
     if (isSignedIn) {
       signOut();
@@ -97,6 +123,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loginAsGuest,
         logout,
         refreshUser,
+        getToken,
       }}
     >
       {children}
