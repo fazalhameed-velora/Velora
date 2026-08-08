@@ -1,4 +1,4 @@
-# TechHive — MERN Stack E-Commerce Platform
+# Velora — MERN Stack E-Commerce Platform
 
 A production-ready, full-stack e-commerce platform for selling mobile phones and tech accessories. Built with React 19 (CRA), Node.js, Express, MongoDB, and Clerk authentication.
 
