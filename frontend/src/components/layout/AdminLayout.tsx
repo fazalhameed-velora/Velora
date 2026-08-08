@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Package, FolderTree, Tags, Ticket, Users, ShoppingBag, BarChart3, Image, ChevronLeft, Menu } from 'lucide-react';
+import { LayoutDashboard, Package, FolderTree, Tags, Ticket, Users, ShoppingBag, BarChart3, Image, ChevronLeft, Menu, Webhook } from 'lucide-react';
 import { cn } from '../../utils';
 
 const sidebarItems = [
@@ -13,6 +13,7 @@ const sidebarItems = [
   { to: '/admin/coupons', icon: Ticket, label: 'Coupons' },
   { to: '/admin/users', icon: Users, label: 'Users' },
   { to: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
+  { to: '/admin/webhooks', icon: Webhook, label: 'Webhooks' },
 ];
 
 function AdminSidebar({ open, setOpen }: { open: boolean; setOpen: (v: boolean) => void }) {

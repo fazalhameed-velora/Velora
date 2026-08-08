@@ -24,6 +24,7 @@ const CartPage = lazy(() => import('./pages/cart/CartPage'));
 const CheckoutPage = lazy(() => import('./pages/checkout/CheckoutPage'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const AdminProducts = lazy(() => import('./pages/admin/AdminProducts'));
+const AdminWebhooks = lazy(() => import('./pages/admin/AdminWebhooks'));
 
 const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || '';
 
@@ -152,6 +153,7 @@ function AppRoutes() {
             <Route path="coupons" element={<AdminCoupons />} />
             <Route path="users" element={<AdminUsers />} />
             <Route path="analytics" element={<AdminAnalytics />} />
+            <Route path="webhooks" element={<AdminWebhooks />} />
           </Route>
 
           <Route path="*" element={<NotFoundPage />} />

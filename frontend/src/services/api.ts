@@ -284,4 +284,15 @@ export const uploadAPI = {
   },
 };
 
+// Webhooks (Admin)
+export const webhookAPI = {
+  getStats: () => api.get('/webhooks/stats'),
+  getDeadLetter: (params?: Record<string, string>) => api.get('/webhooks/dead-letter', { params }),
+  retryEvent: (eventId: string) => api.post(`/webhooks/retry/${eventId}`),
+  retryAll: () => api.post('/webhooks/retry-all'),
+  getRecent: (params?: Record<string, string>) => api.get('/webhooks/recent', { params }),
+  getEvent: (eventId: string) => api.get(`/webhooks/event/${eventId}`),
+  cleanup: (params?: Record<string, string>) => api.delete('/webhooks/cleanup', { params }),
+};
+
 export default api;
