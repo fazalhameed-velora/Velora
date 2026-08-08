@@ -30,12 +30,20 @@ export default function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand */}
           <div>
-            <Link to="/" className="flex items-center gap-2 mb-4">
-              <div className="w-9 h-9 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center">
-                <Package className="text-white" size={20} />
-              </div>
-              <span className="text-xl font-bold text-white">Velora</span>
-            </Link>
+            <Link to="/" className="flex items-center group">
+  <img
+    src="/logo512.png"
+    alt="Velora"
+    className="w-9 h-9 object-contain rounded-xl transition-transform duration-200 group-hover:scale-105"
+  />
+
+  <span className="text-xl font-extrabold tracking-tight">
+    <span className="bg-gradient-to-r from-primary-600 via-primary-500 to-primary-700 bg-clip-text text-transparent">
+      elo
+    </span>
+    <span className="text-surface-900 dark:text-white">ra</span>
+  </span>
+</Link>
             <p className="text-sm text-surface-400 mb-4">Your one-stop shop for the latest tech accessories and gadgets.</p>
             <div className="flex flex-col gap-2 text-sm text-surface-400">
               <div className="flex items-center gap-2"><Phone size={14} /> +92 307 0528980</div>
