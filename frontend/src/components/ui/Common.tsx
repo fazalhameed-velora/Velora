@@ -46,18 +46,18 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: { isOpe
       <div className={cn(
         'relative bg-white dark:bg-surface-900 shadow-2xl w-full animate-slide-up sm:animate-scale-in',
         'rounded-t-3xl sm:rounded-2xl',
-        'max-h-[95vh] sm:max-h-[90vh] overflow-y-auto',
+        'max-h-[88vh] sm:max-h-[90vh] overflow-y-auto',
         'mx-0 sm:mx-4',
         sizes[size]
       )}>
-        {/* Mobile drag handle */}
-        <div className="flex justify-center pt-3 sm:hidden">
+        {/* Mobile drag handle with safe area spacing */}
+        <div className="flex justify-center pt-2 pb-1 sm:hidden" style={{ paddingTop: 'max(0.5rem, env(safe-area-inset-top, 0.5rem))' }}>
           <div className="w-10 h-1 bg-surface-300 dark:bg-surface-600 rounded-full" />
         </div>
         <div className="sticky top-0 bg-white dark:bg-surface-900 z-10">
-          <div className="flex items-center justify-between p-4 sm:p-6 border-b border-surface-100 dark:border-surface-800">
+          <div className="flex items-center justify-between px-4 py-3 sm:p-6 border-b border-surface-100 dark:border-surface-800">
             <h2 className="text-lg font-bold text-surface-900 dark:text-white">{title}</h2>
-            <button onClick={onClose} className="p-2 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-xl transition-colors text-surface-500 dark:text-surface-400 hover:text-surface-700 dark:hover:text-surface-200">
+            <button onClick={onClose} className="p-2.5 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-xl transition-colors text-surface-500 dark:text-surface-400 hover:text-surface-700 dark:hover:text-surface-200">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18"></line>
                 <line x1="6" y1="6" x2="18" y2="18"></line>
