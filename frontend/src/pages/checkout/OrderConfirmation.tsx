@@ -1,10 +1,31 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { CheckCircle, Package, MessageCircle, ArrowRight, Home, ShoppingBag } from 'lucide-react';
+import { CheckCircle, Package, MessageCircle, Home, ShoppingBag, Truck, Clock } from 'lucide-react';
 
 export default function OrderConfirmation() {
   const location = useLocation();
   const orderData = location.state?.orderData;
+
+  // Calculate estimated delivery date (3-5 business days from now)
+  const getEstimatedDelivery = () => {
+    const now = new Date();
+    const deliveryDate = new Date(now);
+    // Add 4 business days (excluding weekends)
+    let businessDaysAdded = 0;
+    while (businessDaysAdded < 4) {
+      deliveryDate.setDate(deliveryDate.getDate() + 1);
+      const day = deliveryDate.getDay();
+      if (day !== 0 && day !== 6) { // Not Sunday or Saturday
+        businessDaysAdded++;
+      }
+    }
+    return deliveryDate.toLocaleDateString('en-PK', { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+  };
 
   return (
     <div className="min-h-[70vh] flex items-center justify-center px-4 py-12">
@@ -21,6 +42,23 @@ export default function OrderConfirmation() {
         <p className="text-surface-500 mb-8">
           Thank you for your order. We'll contact you shortly to confirm.
         </p>
+
+        {/* Delivery Estimate Card */}
+        <div className="bg-gradient-to-r from-primary-50 to-blue-50 dark:from-primary-900/20 dark:to-blue-900/20 rounded-2xl border border-primary-200 dark:border-primary-800 p-6 mb-6">
+          <div className="flex items-center justify-center gap-2 mb-3">
+            <Truck size={24} className="text-primary-600" />
+            <span className="font-semibold text-primary-700 dark:text-primary-400">Estimated Delivery</span>
+          </div>
+          <div className="flex items-center justify-center gap-2">
+            <Clock size={16} className="text-primary-500" />
+            <span className="text-xl font-bold text-primary-700 dark:text-primary-300">
+              {getEstimatedDelivery()}
+            </span>
+          </div>
+          <p className="text-sm text-primary-600 dark:text-primary-400 mt-2">
+            Free shipping • 3-4 business days
+          </p>
+        </div>
 
         {/* Order Info Card */}
         <div className="bg-white dark:bg-surface-900 rounded-2xl border border-surface-100 dark:border-surface-800 p-6 mb-8 text-left">
@@ -40,6 +78,10 @@ export default function OrderConfirmation() {
             <li className="flex items-start gap-2">
               <span className="text-green-500 mt-0.5">✓</span>
               <span>Free shipping on your order</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-green-500 mt-0.5">✓</span>
+              <span>Cash on Delivery available</span>
             </li>
           </ul>
         </div>
