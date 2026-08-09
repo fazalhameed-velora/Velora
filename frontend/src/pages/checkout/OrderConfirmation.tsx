@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { CheckCircle, Package, MessageCircle, Home, ShoppingBag, Truck, Clock } from 'lucide-react';
+import { CheckCircle, Package, MessageCircle, Home, ShoppingBag, Truck, Clock, Printer } from 'lucide-react';
 
 export default function OrderConfirmation() {
   const location = useLocation();
@@ -10,12 +10,11 @@ export default function OrderConfirmation() {
   const getEstimatedDelivery = () => {
     const now = new Date();
     const deliveryDate = new Date(now);
-    // Add 4 business days (excluding weekends)
     let businessDaysAdded = 0;
     while (businessDaysAdded < 4) {
       deliveryDate.setDate(deliveryDate.getDate() + 1);
       const day = deliveryDate.getDay();
-      if (day !== 0 && day !== 6) { // Not Sunday or Saturday
+      if (day !== 0 && day !== 6) {
         businessDaysAdded++;
       }
     }
@@ -25,6 +24,85 @@ export default function OrderConfirmation() {
       month: 'long', 
       day: 'numeric' 
     });
+  };
+
+  const handlePrint = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+    
+    const orderNumber = orderData?.orderId ? `#${orderData.orderId.slice(-8).toUpperCase()}` : 'N/A';
+    const orderDate = new Date().toLocaleDateString('en-PK', { year: 'numeric', month: 'long', day: 'numeric' });
+    
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Order Receipt - Velora</title>
+        <style>
+          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 400px; margin: 0 auto; padding: 20px; color: #333; }
+          .header { text-align: center; border-bottom: 2px solid #4c6ef5; padding-bottom: 15px; margin-bottom: 20px; }
+          .logo { font-size: 28px; font-weight: bold; color: #4c6ef5; }
+          .order-info { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+          .order-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+          .label { color: #666; }
+          .value { font-weight: 600; }
+          .delivery { background: #e7f5ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; }
+          .delivery-title { color: #1971c2; font-weight: 600; margin-bottom: 5px; }
+          .delivery-date { font-size: 18px; font-weight: bold; color: #1864ab; }
+          .footer { text-align: center; margin-top: 20px; padding-top: 15px; border-top: 1px solid #ddd; color: #666; font-size: 12px; }
+          .whatsapp { color: #25d366; font-weight: 600; }
+          @media print { body { padding: 10px; } }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div class="logo">VELORA</div>
+          <p style="color: #666; margin: 5px 0 0 0;">Tech Accessories & Gadgets</p>
+        </div>
+        
+        <div class="order-info">
+          <div class="order-row">
+            <span class="label">Order Number:</span>
+            <span class="value">${orderNumber}</span>
+          </div>
+          <div class="order-row">
+            <span class="label">Order Date:</span>
+            <span class="value">${orderDate}</span>
+          </div>
+          <div class="order-row">
+            <span class="label">Payment Method:</span>
+            <span class="value">Cash on Delivery</span>
+          </div>
+          <div class="order-row">
+            <span class="label">Shipping:</span>
+            <span class="value" style="color: #2f9e44;">Free</span>
+          </div>
+        </div>
+        
+        <div class="delivery">
+          <div class="delivery-title">📦 Estimated Delivery</div>
+          <div class="delivery-date">${getEstimatedDelivery()}</div>
+        </div>
+        
+        <div style="background: #f0f0f0; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+          <p style="margin: 0 0 10px 0; font-weight: 600;">What's Next:</p>
+          <ul style="margin: 0; padding-left: 20px; color: #555;">
+            <li>Your order has been received</li>
+            <li>We'll confirm via WhatsApp</li>
+            <li>Free shipping on your order</li>
+          </ul>
+        </div>
+        
+        <div class="footer">
+          <p>Questions? Contact us on WhatsApp:</p>
+          <p class="whatsapp">+92 307 0528980</p>
+          <p style="margin-top: 15px;">Thank you for shopping with Velora! ❤️</p>
+        </div>
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
   };
 
   return (
@@ -100,11 +178,20 @@ export default function OrderConfirmation() {
           href={`https://wa.me/${import.meta.env.VITE_WHATSAPP_NUMBER || '923070528980'}?text=Hi, I just placed an order on Velora. Can you confirm my order?`}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-xl font-medium hover:bg-green-700 transition-colors mb-6"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-xl font-medium hover:bg-green-700 transition-colors mb-4"
         >
           <MessageCircle size={18} />
           Confirm on WhatsApp
         </a>
+
+        {/* Print Receipt Button */}
+        <button
+          onClick={handlePrint}
+          className="inline-flex items-center gap-2 px-6 py-3 bg-surface-100 dark:bg-surface-800 text-surface-700 dark:text-surface-300 rounded-xl font-medium hover:bg-surface-200 dark:hover:bg-surface-700 transition-colors mb-6 ml-0 sm:ml-3"
+        >
+          <Printer size={18} />
+          Print Receipt
+        </button>
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
