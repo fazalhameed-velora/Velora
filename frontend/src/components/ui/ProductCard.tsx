@@ -87,11 +87,11 @@ export default function ProductCard({ product, className }: ProductCardProps) {
           )}
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2">
           <Button
             variant={inCart ? 'secondary' : 'primary'}
             size="sm"
-            className="flex-1"
+            className="w-full"
             onClick={(e) => {
               e.preventDefault();
               addToCart(product);
@@ -103,7 +103,7 @@ export default function ProductCard({ product, className }: ProductCardProps) {
           <Button
             variant="outline"
             size="sm"
-            className="flex-1"
+            className="w-full"
             onClick={(e) => {
               e.preventDefault();
               addToCart(product);

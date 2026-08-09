@@ -177,14 +177,14 @@ export default function ProductDetailPage() {
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3 mb-6">
-            <Button size="lg" className="flex-1" onClick={() => addToCart(product, quantity, selectedColor, selectedStorage)} disabled={product.stock === 0}>
+          <div className="flex flex-col sm:flex-row gap-3 mb-6">
+            <Button size="lg" className="w-full sm:flex-1" onClick={() => addToCart(product, quantity, selectedColor, selectedStorage)} disabled={product.stock === 0}>
               <ShoppingCart size={18} />
               {isInCart(product._id) ? 'Update Cart' : 'Add to Cart'}
             </Button>
             <Button
               size="lg"
-              className="flex-1"
+              className="w-full sm:flex-1"
               onClick={() => {
                 addToCart(product, quantity, selectedColor, selectedStorage);
                 window.location.href = '/checkout';
