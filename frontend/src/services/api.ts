@@ -112,10 +112,11 @@ api.interceptors.response.use(
       console.warn(`[API] Slow request: ${response.config.url} took ${duration}ms`);
     }
 
+    // Success notifications are handled by components, not here
+    // Only show auto-notification for non-admin routes if needed
     const message = response.data?.message;
-    if (message && response.config.method !== 'get') {
-      notify.success(message, { duration: 2500 });
-    }
+    const isAdminRoute = window.location.pathname.includes('/admin');
+    // Skip auto-notification for admin routes - components handle their own
 
     return response.data;
   },

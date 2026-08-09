@@ -134,7 +134,7 @@ function createNotify(type: 'success' | 'error' | 'warning' | 'info') {
         );
       },
       {
-        duration: options?.duration || (type === 'error' ? 6000 : type === 'warning' ? 5000 : 3500),
+        duration: options?.duration || (type === 'error' ? 4000 : type === 'warning' ? 3000 : 2000),
         position: 'top-right',
       }
     );
