@@ -54,9 +54,18 @@ export default function HomePage() {
   }, []);
 
   // Separate banners by position (backend already filters by isActive for public API)
-  const heroBanners = banners.filter(b => b.position === 'hero');
-  const promoBanners = banners.filter(b => b.position === 'promo');
-  const sidebarBanners = banners.filter(b => b.position === 'sidebar');
+  // Filter banners by position and scheduling status
+  const isBannerScheduled = (banner: Banner) => {
+    const now = new Date();
+    const start = banner.startDate ? new Date(banner.startDate) : null;
+    const end = banner.endDate ? new Date(banner.endDate) : null;
+    if (start && now < start) return false;
+    if (end && now > end) return false;
+    return true;
+  };
+  const heroBanners = banners.filter(b => b.position === 'hero' && isBannerScheduled(b));
+  const promoBanners = banners.filter(b => b.position === 'promo' && isBannerScheduled(b));
+  const sidebarBanners = banners.filter(b => b.position === 'sidebar' && isBannerScheduled(b));
 
   const trustFeatures = [
     { icon: Truck, title: 'Free Shipping', desc: 'On orders over Rs. 5,000' },

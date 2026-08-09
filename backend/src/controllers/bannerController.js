@@ -16,7 +16,27 @@ exports.getBanners = async (req, res, next) => {
   try {
     const filter = {};
     if (req.query.position) filter.position = req.query.position;
-    if (!req.query.all) filter.isActive = true;
+    if (!req.query.all) {
+      filter.isActive = true;
+      // For public API, filter by date range if startDate/endDate are set
+      const now = new Date();
+      filter.$and = [
+        {
+          $or: [
+            { startDate: { $exists: false } },
+            { startDate: null },
+            { startDate: { $lte: now } }
+          ]
+        },
+        {
+          $or: [
+            { endDate: { $exists: false } },
+            { endDate: null },
+            { endDate: { $gte: now } }
+          ]
+        }
+      ];
+    }
     const banners = await Banner.find(filter).sort('order').lean();
     res.json({ success: true, data: banners });
   } catch (error) {

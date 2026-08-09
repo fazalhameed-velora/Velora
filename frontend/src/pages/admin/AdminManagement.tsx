@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Plus, Edit, Trash2, Search, UserX, UserCheck, Shield, ShieldOff, MoreVertical, Eye, ShoppingBag, TrendingUp } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, UserX, UserCheck, Shield, ShieldOff, MoreVertical, Eye, ShoppingBag, TrendingUp, Calendar } from 'lucide-react';
 import { categoryAPI, brandAPI, couponAPI, bannerAPI, orderAPI, userAPI, productAPI } from '../../services/api';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { Category, Brand, Coupon, Banner } from '../../types';
@@ -503,7 +503,7 @@ function AdminBanners() {
   const [banners, setBanners] = useState<Banner[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [editItem, setEditItem] = useState<Banner | null>(null);
-  const [form, setForm] = useState({ title: '', subtitle: '', position: 'hero' });
+  const [form, setForm] = useState({ title: '', subtitle: '', position: 'hero', startDate: '', endDate: '' });
   const [saving, setSaving] = useState(false);
 
   const load = async () => { try { const res: any = await bannerAPI.getAll({ all: 'true' }); setBanners(res.data || []); } catch (e) { console.error(e); } };
@@ -511,8 +511,25 @@ function AdminBanners() {
 
   const openModal = (item?: Banner) => {
     setEditItem(item || null);
-    setForm(item ? { title: item.title, subtitle: item.subtitle || '', position: item.position } : { title: '', subtitle: '', position: 'hero' });
+    setForm(item ? { 
+      title: item.title, 
+      subtitle: item.subtitle || '', 
+      position: item.position,
+      startDate: item.startDate ? new Date(item.startDate).toISOString().split('T')[0] : '',
+      endDate: item.endDate ? new Date(item.endDate).toISOString().split('T')[0] : ''
+    } : { title: '', subtitle: '', position: 'hero', startDate: '', endDate: '' });
     setShowModal(true);
+  };
+
+  const getSchedulingStatus = (banner: Banner) => {
+    if (!banner.startDate && !banner.endDate) return { label: 'Always Active', color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' };
+    const now = new Date();
+    const start = banner.startDate ? new Date(banner.startDate) : null;
+    const end = banner.endDate ? new Date(banner.endDate) : null;
+    if (start && now < start) return { label: 'Scheduled', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' };
+    if (end && now > end) return { label: 'Expired', color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' };
+    if (start && end) return { label: 'Active Period', color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' };
+    return { label: 'Active', color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' };
   };
 
   const handleSave = async () => {
@@ -555,10 +572,22 @@ function AdminBanners() {
                 <div>
                   <p className="font-medium text-surface-900 dark:text-white">{banner.title}</p>
                   <p className="text-sm text-surface-500">{banner.subtitle || 'No subtitle'}</p>
+                  {(banner.startDate || banner.endDate) && (
+                    <div className="flex items-center gap-1 mt-1">
+                      <Calendar size={12} className="text-surface-400" />
+                      <span className="text-xs text-surface-400">
+                        {banner.startDate ? new Date(banner.startDate).toLocaleDateString() : 'Now'}
+                        {' → '}
+                        {banner.endDate ? new Date(banner.endDate).toLocaleDateString() : 'No end'}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <Badge>{banner.position}</Badge>
+                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getSchedulingStatus(banner).color}`}>{getSchedulingStatus(banner).label}</span>
+                {banner.startDate && <span className="text-xs text-surface-400 hidden sm:inline">{new Date(banner.startDate).toLocaleDateString()}</span>}
                 <div className="flex gap-1">
                   <button onClick={() => openModal(banner)} className="p-2 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-700 text-surface-500 transition-colors"><Edit size={16} /></button>
                   <button onClick={() => handleDelete(banner._id)} className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 transition-colors"><Trash2 size={16} /></button>
@@ -593,6 +622,27 @@ function AdminBanners() {
               <option value="promo">Promo (Content section)</option>
               <option value="sidebar">Sidebar</option>
             </select>
+          </div>
+          {/* Scheduling Section */}
+          <div className="p-4 rounded-xl bg-surface-50 dark:bg-surface-800/50 border border-surface-200 dark:border-surface-700">
+            <p className="text-sm font-medium text-surface-700 dark:text-surface-300 mb-3">📅 Schedule (Optional)</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Input 
+                label="Start Date" 
+                type="date"
+                value={form.startDate} 
+                onChange={(e) => setForm({ ...form, startDate: e.target.value })} 
+                placeholder="When to start showing"
+              />
+              <Input 
+                label="End Date" 
+                type="date"
+                value={form.endDate} 
+                onChange={(e) => setForm({ ...form, endDate: e.target.value })} 
+                placeholder="When to stop showing"
+              />
+            </div>
+            <p className="text-xs text-surface-500 mt-2">Leave empty to show banner always. Set dates to schedule when the banner should be active.</p>
           </div>
         </div>
         <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 mt-6 pt-4 border-t border-surface-100 dark:border-surface-800">

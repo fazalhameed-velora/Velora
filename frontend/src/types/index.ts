@@ -139,6 +139,8 @@ export interface Banner {
   position: string;
   order: number;
   isActive: boolean;
+  startDate?: string;
+  endDate?: string;
 }
 
 export interface Coupon {
