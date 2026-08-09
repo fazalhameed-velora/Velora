@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Plus, Edit, Trash2, Search, UserX, UserCheck, Shield, ShieldOff, MoreVertical, Eye, ShoppingBag, TrendingUp, Calendar, MousePointer, BarChart3 } from 'lucide-react';
-import { categoryAPI, brandAPI, couponAPI, bannerAPI, orderAPI, userAPI, productAPI } from '../../services/api';
+import { categoryAPI, brandAPI, couponAPI, bannerAPI, orderAPI, userAPI, productAPI, ipBlockAPI } from '../../services/api';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { Category, Brand, Coupon, Banner } from '../../types';
 import Button from '../../components/ui/Button';

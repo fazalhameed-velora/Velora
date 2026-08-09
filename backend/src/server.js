@@ -11,6 +11,7 @@ const hpp = require('hpp');
 const { clerkMiddleware } = require('@clerk/express');
 const { connectDB } = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
+const { checkBlockedIP, trackSuspiciousActivity } = require('./middleware/ipBlocker');
 
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
@@ -25,6 +26,7 @@ const analyticsRoutes = require('./routes/analytics');
 const userRoutes = require('./routes/users');
 const searchRoutes = require('./routes/search');
 const webhookRoutes = require('./routes/webhooks');
+const ipBlockRoutes = require('./routes/ipBlock');
 const webhookQueue = require('./services/webhookQueue');
 
 const app = express();
@@ -150,6 +152,10 @@ const strictLimiter = rateLimit({
 
 app.use('/api/', limiter);
 
+// IP blocking and suspicious activity tracking
+app.use(checkBlockedIP);
+app.use('/api/', trackSuspiciousActivity);
+
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
@@ -163,6 +169,7 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/webhooks', webhookRoutes);
+app.use('/api/ip-block', ipBlockRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });

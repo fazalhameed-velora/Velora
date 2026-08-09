@@ -307,4 +307,13 @@ export const webhookAPI = {
   cleanup: (params?: Record<string, string>) => api.delete('/webhooks/cleanup', { params }),
 };
 
+// IP Blocking (Admin)
+export const ipBlockAPI = {
+  getBlockedIPs: () => api.get('/ip-block'),
+  getLogs: (params?: Record<string, string>) => api.get('/ip-block/logs', { params }),
+  blockIP: (data: { ip: string; reason?: string; notes?: string; duration?: number }) => api.post('/ip-block/block', data),
+  unblockIP: (ip: string) => api.post('/ip-block/unblock', { ip }),
+  getStats: () => api.get('/ip-block/stats'),
+};
+
 export default api;
