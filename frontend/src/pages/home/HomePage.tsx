@@ -36,7 +36,7 @@ export default function HomePage() {
           productAPI.getAll({ isNewArrival: 'true', limit: '8' }) as any,
           categoryAPI.getAll() as any,
           brandAPI.getAll() as any,
-          bannerAPI.getAll() as any,
+          bannerAPI.getAll({ all: 'true' }) as any,
         ]);
         setFeaturedProducts(featured.data || []);
         setTrendingProducts(trending.data || []);
@@ -53,10 +53,10 @@ export default function HomePage() {
     load();
   }, []);
 
-  // Separate banners by position
-  const heroBanners = banners.filter(b => b.position === 'hero' && b.isActive);
-  const promoBanners = banners.filter(b => b.position === 'promo' && b.isActive);
-  const sidebarBanners = banners.filter(b => b.position === 'sidebar' && b.isActive);
+  // Separate banners by position (backend already filters by isActive for public API)
+  const heroBanners = banners.filter(b => b.position === 'hero');
+  const promoBanners = banners.filter(b => b.position === 'promo');
+  const sidebarBanners = banners.filter(b => b.position === 'sidebar');
 
   const trustFeatures = [
     { icon: Truck, title: 'Free Shipping', desc: 'On orders over Rs. 5,000' },
