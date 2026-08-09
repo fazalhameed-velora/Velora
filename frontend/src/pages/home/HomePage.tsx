@@ -42,16 +42,21 @@ export default function HomePage() {
   useEffect(() => {
     const load = async () => {
       try {
-        const [featured, trending, newest, cats, brandsRes, bannersRes] = await Promise.all([
+        const [featured, trending, newest, popular, cats, brandsRes, bannersRes] = await Promise.all([
           productAPI.getAll({ isFeatured: 'true', limit: '8' }) as any,
           productAPI.getAll({ isTrending: 'true', limit: '8' }) as any,
           productAPI.getAll({ isNewArrival: 'true', limit: '8' }) as any,
+          productAPI.getAll({ sort: 'popular', limit: '8' }) as any, // fallback
           categoryAPI.getAll() as any,
           brandAPI.getAll() as any,
           bannerAPI.getAll({ all: 'true' }) as any,
         ]);
-        setFeaturedProducts(featured.data || []);
-        setTrendingProducts(trending.data || []);
+        // Use fallbacks: if no featured products, use popular ones
+        const featuredData = featured.data || [];
+        const trendingData = trending.data || [];
+        const popularData = popular.data || [];
+        setFeaturedProducts(featuredData.length > 0 ? featuredData : popularData);
+        setTrendingProducts(trendingData.length > 0 ? trendingData : popularData);
         setNewProducts(newest.data || []);
         setCategories(cats.data || []);
         setBrands(brandsRes.data || []);
