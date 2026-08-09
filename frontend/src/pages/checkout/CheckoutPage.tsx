@@ -94,10 +94,10 @@ export default function CheckoutPage() {
 
       clearCart();
       notify.success('Order Placed Successfully!', {
-        description: 'Your order has been confirmed. Redirecting to WhatsApp for confirmation.',
-        duration: 5000,
+        description: 'Your order has been confirmed.',
+        duration: 3000,
       });
-      navigate('/');
+      navigate('/order-confirmation', { state: { orderData: { total, items } } });
     } catch (e: any) {
       notify.error('Order Failed', {
         description: e.message || 'Unable to place your order. Please try again.',

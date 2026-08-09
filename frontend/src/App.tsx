@@ -24,6 +24,7 @@ const ShopPage = lazy(() => import('./pages/shop/ShopPage'));
 const ProductDetailPage = lazy(() => import('./pages/product/ProductDetailPage'));
 const CartPage = lazy(() => import('./pages/cart/CartPage'));
 const CheckoutPage = lazy(() => import('./pages/checkout/CheckoutPage'));
+const OrderConfirmation = lazy(() => import('./pages/checkout/OrderConfirmation'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const AdminProducts = lazy(() => import('./pages/admin/AdminProducts'));
 const AdminWebhooks = lazy(() => import('./pages/admin/AdminWebhooks'));
@@ -145,6 +146,7 @@ function AppRoutes() {
             <Route path="/product/:slug" element={<ProductDetailPage />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/order-confirmation" element={<OrderConfirmation />} />
 
             <Route path="/user/profile" element={<UserRoute><UserProfile /></UserRoute>} />
             <Route path="/user/orders" element={<UserRoute><UserOrders /></UserRoute>} />
