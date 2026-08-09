@@ -38,21 +38,9 @@ connectDB();
 
 // ========== SECURITY MIDDLEWARE ==========
 
-// 1. Security Headers (Helmet) with CSP
+// 1. Security Headers (Helmet) - CSP disabled for frontend (handled by Vercel)
 app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "https://*.clerk.dev", "https://*.clerk.com", "https://js.clerk.dev", "https://challenges.cloudflare.com"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-      fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
-      imgSrc: ["'self'", "data:", "https:", "blob:"],
-      connectSrc: ["'self'", "https://*.clerk.dev", "https://*.clerk.com", "https://api.clerk.com"],
-      frameSrc: ["'self'", "https://*.clerk.dev", "https://*.clerk.com"],
-      objectSrc: ["'none'"],
-      mediaSrc: ["'self'"],
-    },
-  },
+  contentSecurityPolicy: false, // Let frontend handle CSP via Vercel headers
   crossOriginEmbedderPolicy: false, // Needed for external images
   crossOriginResourcePolicy: { policy: "cross-origin" },
 }));
