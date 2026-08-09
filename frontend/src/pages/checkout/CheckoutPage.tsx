@@ -64,8 +64,8 @@ export default function CheckoutPage() {
     }
   };
 
-  const shippingCost = subtotal > 5000 ? 0 : 150;
-  const total = subtotal - couponDiscount + shippingCost;
+  const shippingCost = 0; // Free shipping
+  const total = subtotal - couponDiscount;
 
   const onSubmit = async (data: CheckoutForm) => {
     setSubmitting(true);
@@ -176,7 +176,7 @@ export default function CheckoutPage() {
                 )}
                 <div className="flex justify-between text-sm">
                   <span className="text-surface-500">Shipping</span>
-                  <span className="font-medium">{shippingCost === 0 ? 'Free' : formatPrice(shippingCost)}</span>
+                  <span className="font-medium text-green-600 dark:text-green-400">🚚 Free Shipping</span>
                 </div>
               </div>
               <div className="border-t border-surface-100 dark:border-surface-800 pt-4 mb-6">

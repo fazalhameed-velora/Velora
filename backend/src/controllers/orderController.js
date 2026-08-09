@@ -45,9 +45,9 @@ exports.createOrder = async (req, res, next) => {
       }
     }
 
-    const shippingCost = subtotal > 5000 ? 0 : 150;
+    const shippingCost = 0; // Free shipping
     const tax = Math.round((subtotal - discount) * 0.0);
-    const total = Math.round(subtotal - discount + shippingCost + tax);
+    const total = Math.round(subtotal - discount + tax);
 
     const order = await Order.create({
       user: req.user?._id || null,
