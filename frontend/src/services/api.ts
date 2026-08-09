@@ -7,10 +7,22 @@ const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const api = axios.create({
   baseURL: API_BASE,
-  timeout: 20000,
+  timeout: 30000, // Increased timeout for cold starts
   headers: { 'Content-Type': 'application/json' },
   withCredentials: true,
 });
+
+// Retry logic for failed requests (helps with backend cold starts)
+const retryRequest = async (error: AxiosError, retries = 2, delay = 2000): Promise<any> => {
+  if (retries <= 0) throw error;
+  
+  // Only retry on network errors or 5xx errors
+  const isRetryable = !error.response || error.response.status >= 500;
+  if (!isRetryable) throw error;
+  
+  await new Promise(resolve => setTimeout(resolve, delay));
+  return api.request(error.config as any);
+};
 
 api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
   const sessionId = session.getSessionId();
@@ -111,18 +123,21 @@ api.interceptors.response.use(
     if (duration > 5000) {
       console.warn(`[API] Slow request: ${response.config.url} took ${duration}ms`);
     }
-
-    // Success notifications are handled by components, not here
-    // Only show auto-notification for non-admin routes if needed
-    const message = response.data?.message;
-    const isAdminRoute = window.location.pathname.includes('/admin');
-    // Skip auto-notification for admin routes - components handle their own
-
     return response.data;
   },
-  (error: AxiosError<{ message?: string; error?: string }>) => {
+  async (error: AxiosError<{ message?: string; error?: string }>) => {
+    // Retry on network errors or 5xx errors (backend cold start)
+    if (!error.response || (error.response.status >= 500 && error.config)) {
+      try {
+        return await retryRequest(error, 2, 2000);
+      } catch (retryError) {
+        // Retry failed, continue to error handling
+        error = retryError as AxiosError<{ message?: string; error?: string }>;
+      }
+    }
+    
     const status = error.response?.status;
-    const data = error.response?.data;
+    const data = error.response?.data as { message?: string; error?: string } | undefined;
     const url = error.config?.url || 'unknown';
 
     if (status === 401) {
