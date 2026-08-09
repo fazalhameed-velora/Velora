@@ -9,3 +9,10 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
+
+// JsBarcode for print receipts
+declare global {
+  interface Window {
+    JsBarcode: (selector: string, value: string, options?: any) => void;
+  }
+}

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { SlidersHorizontal } from 'lucide-react';
+import { SlidersHorizontal, X, ChevronDown } from 'lucide-react';
 import { productAPI, categoryAPI, brandAPI } from '../../services/api';
 import { Product, Category, Brand, Pagination } from '../../types';
 import ProductCard from '../../components/ui/ProductCard';
@@ -84,6 +84,91 @@ export default function ShopPage() {
     setSearchParams({});
   };
 
+  const renderFilterContent = () => (
+    <>
+      {/* Categories */}
+      <div className="bg-white dark:bg-surface-900 rounded-2xl border border-surface-100 dark:border-surface-800 p-4">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold text-surface-900 dark:text-white text-sm">Categories</h3>
+          {selectedCategories.length > 0 && <button onClick={() => setSelectedCategories([])} className="text-xs text-primary-600">Clear</button>}
+        </div>
+        <div className="space-y-2">
+          {categories.map(cat => (
+            <label key={cat._id} className="flex items-center gap-2 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={selectedCategories.includes(cat._id)}
+                onChange={(e) => setSelectedCategories(e.target.checked ? [cat._id] : [])}
+                className="rounded border-surface-300 text-primary-600 focus:ring-primary-500"
+              />
+              <span className="text-sm text-surface-600 dark:text-surface-400 group-hover:text-surface-900 dark:group-hover:text-white transition-colors">{cat.name}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {/* Price Range */}
+      <div className="bg-white dark:bg-surface-900 rounded-2xl border border-surface-100 dark:border-surface-800 p-4">
+        <h3 className="font-semibold text-surface-900 dark:text-white text-sm mb-4">Price Range</h3>
+        <div className="space-y-3">
+          <input type="range" min="0" max="500000" step="1000" value={priceRange[1]} onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])} className="w-full accent-primary-600" />
+          <div className="flex items-center gap-2 text-sm text-surface-600 dark:text-surface-400">
+            <span>{formatPrice(priceRange[0])}</span>
+            <span>-</span>
+            <span>{formatPrice(priceRange[1])}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Brands */}
+      <div className="bg-white dark:bg-surface-900 rounded-2xl border border-surface-100 dark:border-surface-800 p-4">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold text-surface-900 dark:text-white text-sm">Brands</h3>
+          {selectedBrands.length > 0 && <button onClick={() => setSelectedBrands([])} className="text-xs text-primary-600">Clear</button>}
+        </div>
+        <div className="space-y-2 max-h-48 overflow-y-auto">
+          {brands.map(brand => (
+            <label key={brand._id} className="flex items-center gap-2 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={selectedBrands.includes(brand._id)}
+                onChange={(e) => setSelectedBrands(e.target.checked ? [...selectedBrands, brand._id] : selectedBrands.filter(b => b !== brand._id))}
+                className="rounded border-surface-300 text-primary-600 focus:ring-primary-500"
+              />
+              <span className="text-sm text-surface-600 dark:text-surface-400 group-hover:text-surface-900 dark:group-hover:text-white transition-colors">{brand.name}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {/* Rating */}
+      <div className="bg-white dark:bg-surface-900 rounded-2xl border border-surface-100 dark:border-surface-800 p-4">
+        <h3 className="font-semibold text-surface-900 dark:text-white text-sm mb-4">Rating</h3>
+        <div className="flex gap-2">
+          {[4, 3, 2, 1].map(r => (
+            <button key={r} onClick={() => setSelectedRating(selectedRating === r ? 0 : r)} className={cn('px-3 py-1.5 rounded-lg text-xs font-medium border transition-all', selectedRating === r ? 'bg-primary-600 text-white border-primary-600' : 'border-surface-200 dark:border-surface-700 text-surface-600 dark:text-surface-400 hover:border-primary-300')}>
+              {r}★+
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* In Stock Only */}
+      <div className="bg-white dark:bg-surface-900 rounded-2xl border border-surface-100 dark:border-surface-800 p-4">
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" checked={inStockOnly} onChange={(e) => setInStockOnly(e.target.checked)} className="rounded border-surface-300 text-primary-600 focus:ring-primary-500" />
+          <span className="text-sm font-medium text-surface-700 dark:text-surface-300">In Stock Only</span>
+        </label>
+      </div>
+
+      {/* Apply/Clear Buttons */}
+      <div className="flex gap-2">
+        <Button onClick={() => { applyFilters(); setShowFilters(false); }} className="flex-1">Apply</Button>
+        <Button variant="outline" onClick={() => { clearFilters(); setShowFilters(false); }}>Clear</Button>
+      </div>
+    </>
+  );
+
   const sortOptions = [
     { value: 'newest', label: 'Newest' },
     { value: 'price_asc', label: 'Price: Low to High' },
@@ -100,102 +185,51 @@ export default function ShopPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-surface-900 dark:text-white">{pageTitle}</h1>
           <p className="text-surface-500 text-sm mt-1">{pagination.total} products found</p>
         </div>
-        <div className="flex items-center gap-3">
-          <button onClick={() => setShowFilters(!showFilters)} className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-surface-200 dark:border-surface-700 text-sm font-medium hover:bg-surface-50 dark:hover:bg-surface-800 transition-colors">
-            <SlidersHorizontal size={16} /> Filters
+        <div className="flex items-center gap-2">
+          <button onClick={() => setShowFilters(!showFilters)} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-surface-200 dark:border-surface-700 text-sm font-medium hover:bg-surface-50 dark:hover:bg-surface-800 transition-colors">
+            <SlidersHorizontal size={16} /> <span>Filters</span>
           </button>
-          <select value={sortBy} onChange={(e) => { setSortBy(e.target.value); }} className="h-10 px-3 rounded-xl border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-900 text-sm focus:ring-2 focus:ring-primary-500">
-            {sortOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-          </select>
+          <div className="relative">
+            <select value={sortBy} onChange={(e) => { setSortBy(e.target.value); }} className="h-10 pl-3 pr-8 rounded-xl border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-900 text-sm focus:ring-2 focus:ring-primary-500 appearance-none">
+              {sortOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+            </select>
+            <ChevronDown size={14} className="absolute right-2 top-1/2 -translate-y-1/2 text-surface-400 pointer-events-none" />
+          </div>
         </div>
       </div>
 
       <div className="flex gap-6">
-        {/* Sidebar Filters */}
-        <aside className={cn('w-64 flex-shrink-0 space-y-6', showFilters ? 'block' : 'hidden lg:block')}>
-          <div className="bg-white dark:bg-surface-900 rounded-2xl border border-surface-100 dark:border-surface-800 p-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-surface-900 dark:text-white text-sm">Categories</h3>
-              {selectedCategories.length > 0 && <button onClick={() => setSelectedCategories([])} className="text-xs text-primary-600">Clear</button>}
-            </div>
-            <div className="space-y-2">
-              {categories.map(cat => (
-                <label key={cat._id} className="flex items-center gap-2 cursor-pointer group">
-                  <input
-                    type="checkbox"
-                    checked={selectedCategories.includes(cat._id)}
-                    onChange={(e) => setSelectedCategories(e.target.checked ? [cat._id] : [])}
-                    className="rounded border-surface-300 text-primary-600 focus:ring-primary-500"
-                  />
-                  <span className="text-sm text-surface-600 dark:text-surface-400 group-hover:text-surface-900 dark:group-hover:text-white transition-colors">{cat.name}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-surface-900 rounded-2xl border border-surface-100 dark:border-surface-800 p-4">
-            <h3 className="font-semibold text-surface-900 dark:text-white text-sm mb-4">Price Range</h3>
-            <div className="space-y-3">
-              <input type="range" min="0" max="500000" step="1000" value={priceRange[1]} onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])} className="w-full accent-primary-600" />
-              <div className="flex items-center gap-2 text-sm text-surface-600 dark:text-surface-400">
-                <span>{formatPrice(priceRange[0])}</span>
-                <span>-</span>
-                <span>{formatPrice(priceRange[1])}</span>
+        {/* Mobile Filter Overlay */}
+        {showFilters && (
+          <div className="fixed inset-0 z-40 lg:hidden">
+            <div className="absolute inset-0 bg-black/50" onClick={() => setShowFilters(false)} />
+            <div className="absolute left-0 top-0 bottom-0 w-80 max-w-[85vw] bg-white dark:bg-surface-900 overflow-y-auto animate-slide-in-left">
+              <div className="sticky top-0 bg-white dark:bg-surface-900 border-b border-surface-100 dark:border-surface-800 p-4 flex items-center justify-between z-10">
+                <h3 className="font-semibold text-surface-900 dark:text-white">Filters</h3>
+                <button onClick={() => setShowFilters(false)} className="p-2 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-800">
+                  <X size={18} className="text-surface-500" />
+                </button>
+              </div>
+              <div className="p-4 space-y-4">
+                {renderFilterContent()}
               </div>
             </div>
           </div>
+        )}
 
-          <div className="bg-white dark:bg-surface-900 rounded-2xl border border-surface-100 dark:border-surface-800 p-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-surface-900 dark:text-white text-sm">Brands</h3>
-              {selectedBrands.length > 0 && <button onClick={() => setSelectedBrands([])} className="text-xs text-primary-600">Clear</button>}
-            </div>
-            <div className="space-y-2 max-h-48 overflow-y-auto">
-              {brands.map(brand => (
-                <label key={brand._id} className="flex items-center gap-2 cursor-pointer group">
-                  <input
-                    type="checkbox"
-                    checked={selectedBrands.includes(brand._id)}
-                    onChange={(e) => setSelectedBrands(e.target.checked ? [...selectedBrands, brand._id] : selectedBrands.filter(b => b !== brand._id))}
-                    className="rounded border-surface-300 text-primary-600 focus:ring-primary-500"
-                  />
-                  <span className="text-sm text-surface-600 dark:text-surface-400 group-hover:text-surface-900 dark:group-hover:text-white transition-colors">{brand.name}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-surface-900 rounded-2xl border border-surface-100 dark:border-surface-800 p-4">
-            <h3 className="font-semibold text-surface-900 dark:text-white text-sm mb-4">Rating</h3>
-            <div className="flex gap-2">
-              {[4, 3, 2, 1].map(r => (
-                <button key={r} onClick={() => setSelectedRating(selectedRating === r ? 0 : r)} className={cn('px-3 py-1.5 rounded-lg text-xs font-medium border transition-all', selectedRating === r ? 'bg-primary-600 text-white border-primary-600' : 'border-surface-200 dark:border-surface-700 text-surface-600 dark:text-surface-400 hover:border-primary-300')}>
-                  {r}★+
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-surface-900 rounded-2xl border border-surface-100 dark:border-surface-800 p-4">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" checked={inStockOnly} onChange={(e) => setInStockOnly(e.target.checked)} className="rounded border-surface-300 text-primary-600 focus:ring-primary-500" />
-              <span className="text-sm font-medium text-surface-700 dark:text-surface-300">In Stock Only</span>
-            </label>
-          </div>
-
-          <div className="flex gap-2">
-            <Button onClick={applyFilters} className="flex-1">Apply</Button>
-            <Button variant="outline" onClick={clearFilters}>Clear</Button>
-          </div>
+        {/* Desktop Sidebar Filters */}
+        <aside className="hidden lg:block w-64 flex-shrink-0 space-y-4">
+          {renderFilterContent()}
         </aside>
 
         {/* Products Grid */}
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           {loading ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6">
               {[...Array(12)].map((_, i) => <ProductCardSkeleton key={i} />)}

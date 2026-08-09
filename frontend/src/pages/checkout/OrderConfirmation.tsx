@@ -2,6 +2,13 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { CheckCircle, Package, MessageCircle, Home, ShoppingBag, Truck, Clock, Printer } from 'lucide-react';
 
+// JsBarcode type declaration for print window
+declare global {
+  interface Window {
+    JsBarcode?: (selector: string, value: string, options?: any) => void;
+  }
+}
+
 export default function OrderConfirmation() {
   const location = useLocation();
   const orderData = location.state?.orderData;
