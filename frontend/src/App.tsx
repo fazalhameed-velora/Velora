@@ -144,9 +144,7 @@ function AppRoutes() {
             <Route path="/shop" element={<ShopPage />} />
             <Route path="/product/:slug" element={<ProductDetailPage />} />
             <Route path="/cart" element={<CartPage />} />
-            <Route path="/checkout" element={
-              <UserRoute><CheckoutPage /></UserRoute>
-            } />
+            <Route path="/checkout" element={<CheckoutPage />} />
 
             <Route path="/user/profile" element={<UserRoute><UserProfile /></UserRoute>} />
             <Route path="/user/orders" element={<UserRoute><UserOrders /></UserRoute>} />
