@@ -2,13 +2,6 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { CheckCircle, Package, MessageCircle, Home, ShoppingBag, Truck, Clock, Printer } from 'lucide-react';
 
-// JsBarcode type declaration for print window
-declare global {
-  interface Window {
-    JsBarcode?: (selector: string, value: string, options?: any) => void;
-  }
-}
-
 export default function OrderConfirmation() {
   const location = useLocation();
   const orderData = location.state?.orderData;
@@ -156,10 +149,11 @@ export default function OrderConfirmation() {
     printWindow.document.close();
     
     // Generate barcode after document is loaded
-    printWindow.onload = () => {
+    const generateBarcode = () => {
       try {
-        if (printWindow.JsBarcode) {
-          printWindow.JsBarcode('#barcode', orderData?.orderId?.slice(-8).toUpperCase() || '00000000', {
+        const JsBarcodeFunc = (printWindow as any).JsBarcode;
+        if (JsBarcodeFunc && printWindow.document.getElementById('barcode')) {
+          JsBarcodeFunc('#barcode', orderData?.orderId?.slice(-8).toUpperCase() || '00000000', {
             format: 'CODE128',
             width: 2,
             height: 50,
@@ -169,30 +163,25 @@ export default function OrderConfirmation() {
             background: '#ffffff',
             lineColor: '#000000',
           });
+          return true;
         }
-        printWindow.print();
       } catch (e) {
-        printWindow.print();
+        // Ignore errors
       }
+      return false;
     };
-    // Fallback if onload doesn't fire
+
+    // Try to generate barcode after a short delay
     setTimeout(() => {
-      try {
-        if (printWindow.JsBarcode && printWindow.document.getElementById('barcode')) {
-          printWindow.JsBarcode('#barcode', orderData?.orderId?.slice(-8).toUpperCase() || '00000000', {
-            format: 'CODE128',
-            width: 2,
-            height: 50,
-            displayValue: true,
-            fontSize: 14,
-            margin: 10,
-          });
-        }
-        printWindow.print();
-      } catch (e) {
+      generateBarcode();
+      printWindow.print();
+    }, 500);
+    // Fallback - just print
+    setTimeout(() => {
+      if (!generateBarcode()) {
         printWindow.print();
       }
-    }, 1000);
+    }, 1500);
   };
 
   return (
