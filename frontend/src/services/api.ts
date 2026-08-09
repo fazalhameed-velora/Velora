@@ -130,10 +130,16 @@ api.interceptors.response.use(
         localStorage.removeItem('guestId');
       }
       
-      if (!window.location.pathname.includes('/admin')) {
-        notify.warning('Your session has expired. Please sign in again.', {
-          description: 'You\'ll be redirected to the home page.',
-          duration: 5000,
+      // Only show session expired warning for protected routes (not public pages)
+      const isProtectedRoute = window.location.pathname.includes('/admin') || 
+                                window.location.pathname.includes('/user') ||
+                                window.location.pathname.includes('/checkout');
+      const isAuthApi = url.includes('/auth/') || url.includes('/users/profile') || url.includes('/users/wishlist') || url.includes('/users/addresses');
+      
+      // Don't show warning for public pages or initial auth checks
+      if (isProtectedRoute || isAuthApi) {
+        notify.warning('Please sign in to continue.', {
+          duration: 3000,
         });
       }
     } else if (status === 403) {
@@ -214,6 +220,7 @@ export const orderAPI = {
   getById: (id: string) => api.get(`/orders/${id}`),
   create: (data: any) => api.post('/orders', data),
   updateStatus: (id: string, data: any) => api.put(`/orders/${id}/status`, data),
+  delete: (id: string) => api.delete(`/orders/${id}`),
   getStats: () => api.get('/orders/stats'),
 };
 

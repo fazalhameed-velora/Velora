@@ -102,7 +102,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 min-w-0">
         {statCards.map((card, i) => (
           <div key={i} className="bg-white dark:bg-surface-900 rounded-2xl border border-surface-100 dark:border-surface-800 p-5 hover:shadow-lg transition-shadow duration-300">
             <div className="flex items-start justify-between mb-4">
@@ -122,8 +122,7 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Recent Orders */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-w-0">
         <div className="bg-white dark:bg-surface-900 rounded-2xl border border-surface-100 dark:border-surface-800 p-6">
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-3">

@@ -121,6 +121,25 @@ exports.updateOrderStatus = async (req, res, next) => {
   }
 };
 
+exports.deleteOrder = async (req, res, next) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+    
+    // Restore product stock
+    for (const item of order.items) {
+      await Product.findByIdAndUpdate(item.product, {
+        $inc: { stock: item.quantity, soldCount: -item.quantity }
+      });
+    }
+    
+    await Order.findByIdAndDelete(req.params.id);
+    res.json({ success: true, message: 'Order deleted successfully' });
+  } catch (error) {
+    next(error);
+  }
+};
+
 exports.getOrderStats = async (req, res, next) => {
   try {
     const stats = await Order.aggregate([

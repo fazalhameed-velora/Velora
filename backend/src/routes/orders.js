@@ -7,5 +7,6 @@ router.get('/', protect, ctrl.getOrders);
 router.get('/:id', protect, ctrl.getOrderById);
 router.post('/', optionalAuth, ctrl.createOrder);
 router.put('/:id/status', protect, authorize('admin'), ctrl.updateOrderStatus);
+router.delete('/:id', protect, authorize('admin'), ctrl.deleteOrder);
 
 module.exports = router;

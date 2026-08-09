@@ -4,8 +4,8 @@ import { Product } from '../../types';
 import { formatPrice, getDiscountedPrice } from '../../utils';
 import { useCart } from '../../contexts/CartContext';
 import { useWishlist } from '../../contexts/WishlistContext';
-import { Link } from 'react-router-dom';
-import { ShoppingCart, Star, Heart } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ShoppingCart, Star, Heart, Zap } from 'lucide-react';
 import Button from './Button';
 
 interface ProductCardProps {
@@ -16,6 +16,7 @@ interface ProductCardProps {
 export default function ProductCard({ product, className }: ProductCardProps) {
   const { addToCart, isInCart } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
+  const navigate = useNavigate();
   const discounted = getDiscountedPrice(product.price, product.discount);
   const inCart = isInCart(product._id);
   const inWishlist = isInWishlist(product._id);
@@ -86,18 +87,33 @@ export default function ProductCard({ product, className }: ProductCardProps) {
           )}
         </div>
 
-        <Button
-          variant={inCart ? 'secondary' : 'primary'}
-          size="sm"
-          className="w-full"
-          onClick={(e) => {
-            e.preventDefault();
-            addToCart(product);
-          }}
-        >
-          <ShoppingCart size={14} />
-          {inCart ? 'In Cart' : 'Add to Cart'}
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant={inCart ? 'secondary' : 'primary'}
+            size="sm"
+            className="flex-1"
+            onClick={(e) => {
+              e.preventDefault();
+              addToCart(product);
+            }}
+          >
+            <ShoppingCart size={14} />
+            {inCart ? 'In Cart' : 'Add to Cart'}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1"
+            onClick={(e) => {
+              e.preventDefault();
+              addToCart(product);
+              navigate('/checkout');
+            }}
+          >
+            <Zap size={14} />
+            Buy Now
+          </Button>
+        </div>
       </div>
     </div>
   );

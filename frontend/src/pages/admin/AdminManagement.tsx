@@ -222,6 +222,11 @@ function AdminOrders() {
     try { await orderAPI.updateStatus(id, { status }); notify.success('Status Updated', { description: 'Order status has been changed.' }); load(); } catch (e: any) { notify.error('Operation Failed', { description: e.message }); }
   };
 
+  const deleteOrder = async (id: string) => {
+    if (!window.confirm('Are you sure you want to permanently delete this order? This cannot be undone.')) return;
+    try { await orderAPI.delete(id); notify.success('Order Deleted', { description: 'Order has been permanently removed.' }); load(); } catch (e: any) { notify.error('Delete Failed', { description: e.message }); }
+  };
+
   const statusOptions = ['pending', 'confirmed', 'packed', 'shipped', 'delivered', 'cancelled', 'returned'];
 
   return (
@@ -285,13 +290,22 @@ function AdminOrders() {
                       <Badge variant={order.status === 'delivered' ? 'success' : order.status === 'cancelled' ? 'danger' : 'warning'}>{order.status}</Badge>
                     </td>
                     <td className="py-3 px-4 text-right">
-                      <select
-                        value={order.status}
-                        onChange={(e) => updateStatus(order._id, e.target.value)}
-                        className="text-xs px-3 py-1.5 rounded-lg border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 font-medium"
-                      >
-                        {statusOptions.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
-                      </select>
+                      <div className="flex items-center justify-end gap-2">
+                        <select
+                          value={order.status}
+                          onChange={(e) => updateStatus(order._id, e.target.value)}
+                          className="text-xs px-3 py-1.5 rounded-lg border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 font-medium"
+                        >
+                          {statusOptions.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
+                        </select>
+                        <button
+                          onClick={() => deleteOrder(order._id)}
+                          className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 transition-colors"
+                          title="Delete order"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

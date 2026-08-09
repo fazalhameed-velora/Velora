@@ -60,7 +60,7 @@ function AdminSidebar({ open, setOpen }: { open: boolean; setOpen: (v: boolean) 
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = React.useState(true);
   return (
-    <div className="min-h-screen bg-surface-50 dark:bg-surface-950">
+    <div className="min-h-screen bg-surface-50 dark:bg-surface-950 overflow-x-hidden">
       <AdminSidebar open={sidebarOpen} setOpen={setSidebarOpen} />
       <div className="lg:ml-64">
         <header className="sticky top-0 z-30 h-14 bg-white/80 dark:bg-surface-900/80 backdrop-blur-md border-b border-surface-200 dark:border-surface-800 flex items-center px-4 gap-4">

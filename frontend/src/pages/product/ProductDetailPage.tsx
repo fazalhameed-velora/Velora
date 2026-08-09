@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Star, ShoppingCart, Truck, Shield, RotateCcw, ChevronRight, Minus, Plus, Share2, Heart } from 'lucide-react';
+import { Star, ShoppingCart, Truck, Shield, RotateCcw, ChevronRight, Minus, Plus, Share2, Heart, Zap } from 'lucide-react';
 import { productAPI } from '../../services/api';
 import { Product } from '../../types';
 import { formatPrice, getDiscountedPrice, getStockStatus } from '../../utils';
@@ -182,6 +182,20 @@ export default function ProductDetailPage() {
               <ShoppingCart size={18} />
               {isInCart(product._id) ? 'Update Cart' : 'Add to Cart'}
             </Button>
+            <Button
+              size="lg"
+              className="flex-1"
+              onClick={() => {
+                addToCart(product, quantity, selectedColor, selectedStorage);
+                window.location.href = '/checkout';
+              }}
+              disabled={product.stock === 0}
+            >
+              <Zap size={18} />
+              Buy Now
+            </Button>
+          </div>
+          <div className="flex gap-3 mb-6">
             <button
               onClick={() => toggleWishlist(product)}
               className={`p-3 rounded-xl border-2 transition-all ${isInWishlist(product._id) ? 'border-red-500 bg-red-50 dark:bg-red-900/20 text-red-500' : 'border-surface-200 dark:border-surface-700 text-surface-400 hover:border-red-300 hover:text-red-400'}`}

@@ -46,7 +46,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: { isOpe
       <div className={cn('relative bg-white dark:bg-surface-900 rounded-2xl shadow-2xl w-full max-h-[90vh] overflow-y-auto animate-scale-in', sizes[size])}>
         <div className="flex items-center justify-between p-6 border-b border-surface-100 dark:border-surface-800">
           <h2 className="text-lg font-bold text-surface-900 dark:text-white">{title}</h2>
-          <button onClick={onClose} className="p-2 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-lg transition-colors">✕</button>
+          <button onClick={onClose} className="p-2 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-lg transition-colors text-surface-500 dark:text-surface-400 hover:text-surface-700 dark:hover:text-surface-200">✕</button>
         </div>
         <div className="p-6">{children}</div>
       </div>

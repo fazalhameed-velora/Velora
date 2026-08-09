@@ -32,6 +32,14 @@ const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, retry: 1, staleTime: 5 * 60 * 1000 } },
 });
 
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
+
 function PageTracker() {
   const location = useLocation();
   useEffect(() => {
@@ -178,6 +186,7 @@ function App() {
                 <WishlistProvider>
                   <RecentlyViewedProvider>
                     <BrowserRouter>
+                      <ScrollToTop />
                       <PageTracker />
                       <AppRoutes />
                       <CookieConsent />

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Package, Heart, MapPin, AlertTriangle, Trash2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useWishlist } from '../../contexts/WishlistContext';
 import { userAPI, orderAPI } from '../../services/api';
 import { Order, Address } from '../../types';
 import { formatPrice, formatDate } from '../../utils';
@@ -207,27 +208,16 @@ function UserOrders() {
 }
 
 function UserWishlist() {
-  const [wishlist, setWishlist] = useState<any[]>([]);
-
-  useEffect(() => {
-    const load = async () => {
-      try { const res: any = await userAPI.getWishlist(); setWishlist(res.data || []); } catch (e) { console.error(e); }
-    };
-    load();
-  }, []);
-
-  const toggleWishlist = async (productId: string) => {
-    try {
-      await userAPI.toggleWishlist(productId);
-      setWishlist(wishlist.filter(p => p._id !== productId));
-      notify.success('Removed from Wishlist', { description: 'Item has been removed from your wishlist.' });
-    } catch (e: any) { notify.error('Remove Failed', { description: e.message }); }
-  };
+  const { items: wishlist, removeFromWishlist, loading } = useWishlist();
 
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-surface-900 dark:text-white">Wishlist</h1>
-      {wishlist.length === 0 ? (
+      {loading ? (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[...Array(3)].map((_, i) => <div key={i} className="h-64 skeleton rounded-2xl" />)}
+        </div>
+      ) : wishlist.length === 0 ? (
         <EmptyState icon={<Heart size={48} />} title="Wishlist is empty" description="Save products you love for later." action={<Link to="/shop"><Button>Browse Products</Button></Link>} />
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -236,7 +226,7 @@ function UserWishlist() {
               <img src={product.images?.[0]?.url || ''} alt="" className="w-full aspect-square object-cover rounded-xl mb-3" />
               <Link to={`/product/${product.slug}`} className="font-medium text-surface-900 dark:text-white text-sm hover:text-primary-600 line-clamp-1">{product.name}</Link>
               <p className="text-sm font-bold text-surface-900 dark:text-white mt-1">{formatPrice(product.price)}</p>
-              <Button variant="ghost" size="sm" className="mt-2 text-red-500" onClick={() => toggleWishlist(product._id)}>Remove</Button>
+              <Button variant="ghost" size="sm" className="mt-2 text-red-500" onClick={() => removeFromWishlist(product._id)}>Remove</Button>
             </div>
           ))}
         </div>

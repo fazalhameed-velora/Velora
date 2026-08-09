@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Smartphone, Headphones, Watch, Battery, Shield, Cable, Zap, Star, ChevronRight, Truck, RotateCcw, Headset, ShoppingBag, Clock } from 'lucide-react';
-import { productAPI, categoryAPI, brandAPI } from '../../services/api';
-import { Product, Category, Brand } from '../../types';
+import { productAPI, categoryAPI, brandAPI, bannerAPI } from '../../services/api';
+import { Product, Category, Brand, Banner } from '../../types';
 import ProductCard from '../../components/ui/ProductCard';
 import { ProductCardSkeleton } from '../../components/ui/Skeleton';
 import { useRecentlyViewed } from '../../contexts/RecentlyViewedContext';
@@ -23,24 +23,27 @@ export default function HomePage() {
   const [newProducts, setNewProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
+  const [banners, setBanners] = useState<Banner[]>([]);
   const [loading, setLoading] = useState(true);
   const { items: recentlyViewed } = useRecentlyViewed();
 
   useEffect(() => {
     const load = async () => {
       try {
-        const [featured, trending, newest, cats, brandsRes] = await Promise.all([
+        const [featured, trending, newest, cats, brandsRes, bannersRes] = await Promise.all([
           productAPI.getAll({ isFeatured: 'true', limit: '8' }) as any,
           productAPI.getAll({ isTrending: 'true', limit: '8' }) as any,
           productAPI.getAll({ isNewArrival: 'true', limit: '8' }) as any,
           categoryAPI.getAll() as any,
           brandAPI.getAll() as any,
+          bannerAPI.getAll() as any,
         ]);
         setFeaturedProducts(featured.data || []);
         setTrendingProducts(trending.data || []);
         setNewProducts(newest.data || []);
         setCategories(cats.data || []);
         setBrands(brandsRes.data || []);
+        setBanners(bannersRes.data || []);
       } catch (error) {
         console.error('Failed to load homepage data:', error);
       } finally {
@@ -49,6 +52,11 @@ export default function HomePage() {
     };
     load();
   }, []);
+
+  // Separate banners by position
+  const heroBanners = banners.filter(b => b.position === 'hero' && b.isActive);
+  const promoBanners = banners.filter(b => b.position === 'promo' && b.isActive);
+  const sidebarBanners = banners.filter(b => b.position === 'sidebar' && b.isActive);
 
   const trustFeatures = [
     { icon: Truck, title: 'Free Shipping', desc: 'On orders over Rs. 5,000' },
@@ -240,19 +248,41 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Promo Banner */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
-        <div className="bg-gradient-to-r from-primary-600 to-primary-800 rounded-2xl p-8 sm:p-12 text-white relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-          <div className="relative z-10 max-w-xl">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-3">Up to 30% Off Accessories</h2>
-            <p className="text-primary-100 mb-6">Premium chargers, earbuds, and more at unbeatable prices.</p>
-            <Link to="/shop?category=accessories" className="inline-flex items-center gap-2 bg-white text-primary-700 px-6 py-3 rounded-xl font-semibold hover:bg-primary-50 transition-colors active:scale-[0.98]">
-              Shop Now <ArrowRight size={16} />
-            </Link>
+      {/* Dynamic Banners */}
+      {promoBanners.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+          <div className="space-y-4">
+            {promoBanners.map(banner => (
+              <div
+                key={banner._id}
+                className="bg-gradient-to-r from-primary-600 to-primary-800 rounded-2xl p-8 sm:p-12 text-white relative overflow-hidden"
+              >
+                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+                <div className="relative z-10 max-w-xl">
+                  <h2 className="text-2xl sm:text-3xl font-bold mb-3">{banner.title}</h2>
+                  {banner.subtitle && <p className="text-primary-100 mb-6">{banner.subtitle}</p>}
+                  {banner.link ? (
+                    <Link to={banner.link} className="inline-flex items-center gap-2 bg-white text-primary-700 px-6 py-3 rounded-xl font-semibold hover:bg-primary-50 transition-colors active:scale-[0.98]">
+                      Shop Now <ArrowRight size={16} />
+                    </Link>
+                  ) : (
+                    <Link to="/shop" className="inline-flex items-center gap-2 bg-white text-primary-700 px-6 py-3 rounded-xl font-semibold hover:bg-primary-50 transition-colors active:scale-[0.98]">
+                      Shop Now <ArrowRight size={16} />
+                    </Link>
+                  )}
+                </div>
+                {banner.image?.url && (
+                  <img
+                    src={banner.image.url}
+                    alt={banner.image.alt || banner.title}
+                    className="absolute right-0 top-0 h-full w-1/2 object-cover opacity-30"
+                  />
+                )}
+              </div>
+            ))}
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Trending Products */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16">

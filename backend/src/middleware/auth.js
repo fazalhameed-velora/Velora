@@ -80,14 +80,66 @@ const protect = async (req, res, next) => {
       if (!user) {
         // Auto-create user from Clerk data if not exists
         // This handles cases where Clerk webhook didn't fire or was missed
+        // Try to fetch user data from Clerk Backend API using REST
+        let clerkEmail = `${clerkId}@clerk.generated`;
+        let clerkName = 'User';
+        let clerkAvatar = '';
+        
+        try {
+          if (process.env.CLERK_SECRET_KEY) {
+            const response = await fetch(`https://api.clerk.com/v1/users/${clerkId}`, {
+              headers: {
+                'Authorization': `Bearer ${process.env.CLERK_SECRET_KEY}`,
+                'Content-Type': 'application/json',
+              },
+            });
+            if (response.ok) {
+              const clerkUser = await response.json();
+              clerkEmail = clerkUser.email_addresses?.[0]?.email_address || clerkEmail;
+              clerkName = [clerkUser.first_name, clerkUser.last_name].filter(Boolean).join(' ') || clerkName;
+              clerkAvatar = clerkUser.image_url || clerkAvatar;
+            }
+          }
+        } catch (clerkError) {
+          console.warn('[AUTH] Could not fetch Clerk user data:', clerkError.message);
+          // Fallback to headers if provided by frontend
+          clerkEmail = req.headers['x-user-email'] || clerkEmail;
+          clerkName = req.headers['x-user-name'] || clerkName;
+          clerkAvatar = req.headers['x-user-avatar'] || clerkAvatar;
+        }
+        
         user = await User.create({
           clerkId,
-          email: req.headers['x-user-email'] || `${clerkId}@clerk.generated`,
-          name: req.headers['x-user-name'] || 'User',
-          avatar: req.headers['x-user-avatar'] || '',
+          email: clerkEmail,
+          name: clerkName,
+          avatar: clerkAvatar,
           role: 'user', // Default role - admin must be set manually in MongoDB
         });
         console.log(`[AUTH DEBUG] Created new user: ${user._id}`);
+      } else if (user.email && user.email.includes('@clerk.generated')) {
+        // Update existing user if they have a placeholder email
+        try {
+          if (process.env.CLERK_SECRET_KEY) {
+            const response = await fetch(`https://api.clerk.com/v1/users/${clerkId}`, {
+              headers: {
+                'Authorization': `Bearer ${process.env.CLERK_SECRET_KEY}`,
+                'Content-Type': 'application/json',
+              },
+            });
+            if (response.ok) {
+              const clerkUser = await response.json();
+              const realEmail = clerkUser.email_addresses?.[0]?.email_address;
+              const realName = [clerkUser.first_name, clerkUser.last_name].filter(Boolean).join(' ');
+              if (realEmail) user.email = realEmail;
+              if (realName && user.name === 'User') user.name = realName;
+              if (clerkUser.image_url) user.avatar = clerkUser.image_url;
+              await user.save();
+              console.log(`[AUTH DEBUG] Updated user email from Clerk: ${user.email}`);
+            }
+          }
+        } catch (clerkError) {
+          console.warn('[AUTH] Could not update user from Clerk:', clerkError.message);
+        }
       }
       
       req.user = user;

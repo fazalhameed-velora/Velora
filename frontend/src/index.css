@@ -27,6 +27,51 @@ body {
 .dark ::-webkit-scrollbar-thumb { background: #475569; }
 .dark ::-webkit-scrollbar-thumb:hover { background: #64748b; }
 
+/* Dark mode selection text */
+.dark ::selection {
+  background: rgba(92, 124, 250, 0.3);
+  color: #ffffff;
+}
+
+::selection {
+  background: rgba(92, 124, 250, 0.2);
+  color: #1e293b;
+}
+
+/* Dark mode dropdowns and selects */
+dark select option {
+  background-color: #0f172a;
+  color: #e2e8f0;
+}
+
+/* Dark mode for any remaining white backgrounds */
+.dark input[type="text"],
+.dark input[type="email"],
+.dark input[type="password"],
+.dark input[type="number"],
+.dark textarea,
+.dark select {
+  background-color: #0f172a;
+  color: #e2e8f0;
+  border-color: #334155;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #64748b;
+}
+
+/* Dark mode for dialog/details elements */
+dark details summary::-webkit-details-marker {
+  color: #94a3b8;
+}
+
+/* Three dots menu dark mode */
+dark [data-testid="menu"] {
+  background-color: #1e293b;
+  border-color: #334155;
+}
+
 /* Skeleton Loading */
 .skeleton {
   background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
