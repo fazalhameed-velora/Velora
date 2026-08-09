@@ -17,6 +17,7 @@ export default function AdminProducts() {
   const [showModal, setShowModal] = useState(false);
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [form, setForm] = useState<any>({ name: '', description: '', price: '', stock: '', sku: '', category: '', brand: '', discount: '0', tags: '' });
+  const [flags, setFlags] = useState({ isFeatured: false, isTrending: false, isNewArrival: false, isBestSeller: false });
   const [images, setImages] = useState<File[]>([]);
   const [saving, setSaving] = useState(false);
 
@@ -39,9 +40,11 @@ export default function AdminProducts() {
     if (product) {
       setEditProduct(product);
       setForm({ name: product.name, description: product.description, price: product.price, stock: product.stock, sku: product.sku || '', category: product.category?._id || '', brand: product.brand?._id || '', discount: product.discount, tags: product.tags?.join(', ') || '' });
+      setFlags({ isFeatured: product.isFeatured, isTrending: product.isTrending, isNewArrival: product.isNewArrival, isBestSeller: product.isBestSeller });
     } else {
       setEditProduct(null);
       setForm({ name: '', description: '', price: '', stock: '', sku: '', category: '', brand: '', discount: '0', tags: '' });
+      setFlags({ isFeatured: false, isTrending: false, isNewArrival: false, isBestSeller: false });
     }
     setShowModal(true);
   };
@@ -51,6 +54,11 @@ export default function AdminProducts() {
     try {
       const fd = new FormData();
       Object.keys(form).forEach(k => { if (form[k]) fd.append(k, String(form[k])); });
+      // Add feature flags
+      fd.append('isFeatured', String(flags.isFeatured));
+      fd.append('isTrending', String(flags.isTrending));
+      fd.append('isNewArrival', String(flags.isNewArrival));
+      fd.append('isBestSeller', String(flags.isBestSeller));
       images.forEach(f => fd.append('images', f));
 
       if (editProduct) {
@@ -199,6 +207,78 @@ export default function AdminProducts() {
             onChange={(e) => setForm({ ...form, tags: e.target.value })} 
             placeholder="featured, trending, new-arrival" 
           />
+
+          {/* Product Flags */}
+          <div className="p-4 rounded-xl bg-surface-50 dark:bg-surface-800/50 border border-surface-200 dark:border-surface-700">
+            <p className="text-sm font-medium text-surface-700 dark:text-surface-300 mb-3">🏷️ Display Flags</p>
+            <p className="text-xs text-surface-500 mb-4">These flags determine where products appear on the homepage.</p>
+            <div className="grid grid-cols-2 gap-3">
+              <label className="flex items-center gap-3 p-3 bg-white dark:bg-surface-900 rounded-xl border border-surface-200 dark:border-surface-700 cursor-pointer hover:border-primary-300 transition-colors">
+                <div className="relative">
+                  <input 
+                    type="checkbox" 
+                    checked={flags.isFeatured}
+                    onChange={(e) => setFlags({ ...flags, isFeatured: e.target.checked })}
+                    className="sr-only"
+                  />
+                  <div className={`w-10 h-6 rounded-full transition-colors ${flags.isFeatured ? 'bg-primary-600' : 'bg-surface-300 dark:bg-surface-600'}`} />
+                  <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${flags.isFeatured ? 'translate-x-4' : ''}`} />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-surface-900 dark:text-white">Featured</p>
+                  <p className="text-xs text-surface-500">Show on homepage</p>
+                </div>
+              </label>
+              <label className="flex items-center gap-3 p-3 bg-white dark:bg-surface-900 rounded-xl border border-surface-200 dark:border-surface-700 cursor-pointer hover:border-primary-300 transition-colors">
+                <div className="relative">
+                  <input 
+                    type="checkbox" 
+                    checked={flags.isTrending}
+                    onChange={(e) => setFlags({ ...flags, isTrending: e.target.checked })}
+                    className="sr-only"
+                  />
+                  <div className={`w-10 h-6 rounded-full transition-colors ${flags.isTrending ? 'bg-orange-600' : 'bg-surface-300 dark:bg-surface-600'}`} />
+                  <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${flags.isTrending ? 'translate-x-4' : ''}`} />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-surface-900 dark:text-white">Trending</p>
+                  <p className="text-xs text-surface-500">Show in trending section</p>
+                </div>
+              </label>
+              <label className="flex items-center gap-3 p-3 bg-white dark:bg-surface-900 rounded-xl border border-surface-200 dark:border-surface-700 cursor-pointer hover:border-primary-300 transition-colors">
+                <div className="relative">
+                  <input 
+                    type="checkbox" 
+                    checked={flags.isNewArrival}
+                    onChange={(e) => setFlags({ ...flags, isNewArrival: e.target.checked })}
+                    className="sr-only"
+                  />
+                  <div className={`w-10 h-6 rounded-full transition-colors ${flags.isNewArrival ? 'bg-green-600' : 'bg-surface-300 dark:bg-surface-600'}`} />
+                  <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${flags.isNewArrival ? 'translate-x-4' : ''}`} />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-surface-900 dark:text-white">New Arrival</p>
+                  <p className="text-xs text-surface-500">Mark as new product</p>
+                </div>
+              </label>
+              <label className="flex items-center gap-3 p-3 bg-white dark:bg-surface-900 rounded-xl border border-surface-200 dark:border-surface-700 cursor-pointer hover:border-primary-300 transition-colors">
+                <div className="relative">
+                  <input 
+                    type="checkbox" 
+                    checked={flags.isBestSeller}
+                    onChange={(e) => setFlags({ ...flags, isBestSeller: e.target.checked })}
+                    className="sr-only"
+                  />
+                  <div className={`w-10 h-6 rounded-full transition-colors ${flags.isBestSeller ? 'bg-purple-600' : 'bg-surface-300 dark:bg-surface-600'}`} />
+                  <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${flags.isBestSeller ? 'translate-x-4' : ''}`} />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-surface-900 dark:text-white">Best Seller</p>
+                  <p className="text-xs text-surface-500">Mark as top selling</p>
+                </div>
+              </label>
+            </div>
+          </div>
 
           {/* Image Upload */}
           <div>
