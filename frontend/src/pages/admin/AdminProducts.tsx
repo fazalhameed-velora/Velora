@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Edit, Trash2, Eye, Search } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, Search, Star, TrendingUp, Sparkles, Award } from 'lucide-react';
 import { productAPI, categoryAPI, brandAPI } from '../../services/api';
 import { Product, Category, Brand } from '../../types';
 import { formatPrice, formatDate } from '../../utils';
@@ -84,6 +84,26 @@ export default function AdminProducts() {
     } catch (e: any) { notify.error('Operation Failed', { description: e.message }); }
   };
 
+  const toggleFlag = async (productId: string, flag: 'isFeatured' | 'isTrending' | 'isNewArrival' | 'isBestSeller') => {
+    // Optimistic update
+    setProducts(products.map(p => 
+      p._id === productId ? { ...p, [flag]: !p[flag] } : p
+    ));
+    try {
+      const product = products.find(p => p._id === productId);
+      if (!product) return;
+      const fd = new FormData();
+      fd.append(flag, String(!product[flag]));
+      await productAPI.update(productId, fd);
+    } catch (e: any) {
+      // Revert on error
+      setProducts(products.map(p => 
+        p._id === productId ? { ...p, [flag]: !p[flag] } : p
+      ));
+      notify.error('Failed', { description: 'Could not update flag.' });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -127,9 +147,26 @@ export default function AdminProducts() {
                   </td>
                   <td className="py-3 px-4 hidden lg:table-cell">
                     <div className="flex gap-1">
-                      {product.isFeatured && <Badge variant="info">Featured</Badge>}
-                      {product.isTrending && <Badge variant="warning">Trending</Badge>}
-                      {product.isNewArrival && <Badge variant="success">New</Badge>}
+                      <button 
+                        onClick={() => toggleFlag(product._id, 'isFeatured')}
+                        className={`p-1.5 rounded-lg transition-colors ${product.isFeatured ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-700 hover:text-blue-500'}`}
+                        title={product.isFeatured ? 'Remove Featured' : 'Mark as Featured'}
+                      ><Star size={14} fill={product.isFeatured ? 'currentColor' : 'none'} /></button>
+                      <button 
+                        onClick={() => toggleFlag(product._id, 'isTrending')}
+                        className={`p-1.5 rounded-lg transition-colors ${product.isTrending ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400' : 'text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-700 hover:text-orange-500'}`}
+                        title={product.isTrending ? 'Remove Trending' : 'Mark as Trending'}
+                      ><TrendingUp size={14} /></button>
+                      <button 
+                        onClick={() => toggleFlag(product._id, 'isNewArrival')}
+                        className={`p-1.5 rounded-lg transition-colors ${product.isNewArrival ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' : 'text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-700 hover:text-green-500'}`}
+                        title={product.isNewArrival ? 'Remove New Arrival' : 'Mark as New Arrival'}
+                      ><Sparkles size={14} /></button>
+                      <button 
+                        onClick={() => toggleFlag(product._id, 'isBestSeller')}
+                        className={`p-1.5 rounded-lg transition-colors ${product.isBestSeller ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400' : 'text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-700 hover:text-purple-500'}`}
+                        title={product.isBestSeller ? 'Remove Best Seller' : 'Mark as Best Seller'}
+                      ><Award size={14} /></button>
                     </div>
                   </td>
                   <td className="py-3 px-4">
