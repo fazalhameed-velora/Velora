@@ -77,7 +77,8 @@ export default function CheckoutPage() {
         total,
       };
 
-      await orderAPI.create(orderData);
+      const res: any = await orderAPI.create(orderData);
+      const orderId = res.data?._id || 'N/A';
 
       const whatsappMsg = generateWhatsAppMessage({
         items: items.map(i => ({
@@ -97,7 +98,7 @@ export default function CheckoutPage() {
         description: 'Your order has been confirmed.',
         duration: 3000,
       });
-      navigate('/order-confirmation', { state: { orderData: { total, items } } });
+      navigate('/order-confirmation', { state: { orderData: { orderId, total, items } } });
     } catch (e: any) {
       notify.error('Order Failed', {
         description: e.message || 'Unable to place your order. Please try again.',

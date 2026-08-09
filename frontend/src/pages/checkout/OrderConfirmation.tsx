@@ -39,6 +39,15 @@ export default function OrderConfirmation() {
         <h1 className="text-3xl font-bold text-surface-900 dark:text-white mb-3">
           Order Placed Successfully!
         </h1>
+        
+        {/* Order Number */}
+        {orderData?.orderId && (
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-surface-100 dark:bg-surface-800 rounded-xl mb-4">
+            <span className="text-sm text-surface-500">Order</span>
+            <span className="font-mono font-bold text-surface-900 dark:text-white">#{orderData.orderId.slice(-8).toUpperCase()}</span>
+          </div>
+        )}
+        
         <p className="text-surface-500 mb-8">
           Thank you for your order. We'll contact you shortly to confirm.
         </p>
