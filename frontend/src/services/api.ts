@@ -5,9 +5,18 @@ import { getFreshToken } from '../contexts/AuthContext';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
+// Loading state callbacks (set by LoadingProvider)
+let showLoadingFn: ((message?: string) => void) | null = null;
+let hideLoadingFn: (() => void) | null = null;
+
+export const setLoadingCallbacks = (show: (msg?: string) => void, hide: () => void) => {
+  showLoadingFn = show;
+  hideLoadingFn = hide;
+};
+
 const api = axios.create({
   baseURL: API_BASE,
-  timeout: 30000, // Increased timeout for cold starts
+  timeout: 30000,
   headers: { 'Content-Type': 'application/json' },
   withCredentials: true,
 });
@@ -128,10 +137,14 @@ api.interceptors.response.use(
   async (error: AxiosError<{ message?: string; error?: string }>) => {
     // Retry on network errors or 5xx errors (backend cold start)
     if (!error.response || (error.response.status >= 500 && error.config)) {
+      // Show loading spinner during retry
+      if (showLoadingFn) showLoadingFn('Connecting to server...');
       try {
-        return await retryRequest(error, 2, 2000);
+        const result = await retryRequest(error, 2, 2000);
+        if (hideLoadingFn) hideLoadingFn();
+        return result;
       } catch (retryError) {
-        // Retry failed, continue to error handling
+        if (hideLoadingFn) hideLoadingFn();
         error = retryError as AxiosError<{ message?: string; error?: string }>;
       }
     }

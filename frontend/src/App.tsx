@@ -9,10 +9,12 @@ import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import { WishlistProvider } from './contexts/WishlistContext';
 import { RecentlyViewedProvider } from './contexts/RecentlyViewedContext';
+import { LoadingProvider } from './contexts/LoadingContext';
 import MainLayout from './components/layout/MainLayout';
 import AdminLayout from './components/layout/AdminLayout';
 import ErrorBoundary from './components/ui/ErrorBoundary';
 import CookieConsent from './components/ui/CookieConsent';
+import GlobalLoadingSpinner from './components/ui/LoadingSpinner';
 import session from './utils/session';
 import { AdminCategories, AdminBrands, AdminOrders, AdminCoupons, AdminBanners, AdminUsers, AdminAnalytics } from './pages/admin/AdminManagement';
 import { UserProfile, UserOrders, UserWishlist, UserAddresses } from './pages/user/UserPages';
@@ -182,15 +184,17 @@ function App() {
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
-          <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY}>
-            <AuthProvider>
-              <CartProvider>
-                <WishlistProvider>
-                  <RecentlyViewedProvider>
-                    <BrowserRouter>
-                      <ScrollToTop />
-                      <PageTracker />
-                      <AppRoutes />
+          <LoadingProvider>
+            <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY}>
+              <AuthProvider>
+                <CartProvider>
+                  <WishlistProvider>
+                    <RecentlyViewedProvider>
+                      <BrowserRouter>
+                        <ScrollToTop />
+                        <PageTracker />
+                        <GlobalLoadingSpinner />
+                        <AppRoutes />
                       <CookieConsent />
                       <Toaster
                         position="top-right"
@@ -209,6 +213,7 @@ function App() {
               </CartProvider>
             </AuthProvider>
           </ClerkProvider>
+          </LoadingProvider>
         </ThemeProvider>
       </QueryClientProvider>
     </HelmetProvider>
