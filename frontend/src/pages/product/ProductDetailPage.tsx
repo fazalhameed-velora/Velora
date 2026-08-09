@@ -21,18 +21,25 @@ export default function ProductDetailPage() {
   const [selectedStorage, setSelectedStorage] = useState('');
   const [reviews, setReviews] = useState<any[]>([]);
   const [reviewSort, setReviewSort] = useState<'newest' | 'oldest' | 'highest' | 'lowest' | 'helpful'>('newest');
+  const [ratingFilter, setRatingFilter] = useState<number | null>(null);
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
   const [submittingReview, setSubmittingReview] = useState(false);
 
-  const getSortedReviews = () => {
-    const sorted = [...reviews];
+  const getRatingDistribution = () => {
+    const dist = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+    reviews.forEach(r => { if (dist[r.rating as keyof typeof dist] !== undefined) dist[r.rating as keyof typeof dist]++; });
+    return dist;
+  };
+
+  const getFilteredAndSortedReviews = () => {
+    let filtered = ratingFilter ? reviews.filter(r => r.rating === ratingFilter) : [...reviews];
     switch (reviewSort) {
-      case 'newest': return sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-      case 'oldest': return sorted.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-      case 'highest': return sorted.sort((a, b) => b.rating - a.rating);
-      case 'lowest': return sorted.sort((a, b) => a.rating - b.rating);
-      case 'helpful': return sorted.sort((a, b) => (b.helpful || 0) - (a.helpful || 0));
-      default: return sorted;
+      case 'newest': return filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      case 'oldest': return filtered.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+      case 'highest': return filtered.sort((a, b) => b.rating - a.rating);
+      case 'lowest': return filtered.sort((a, b) => a.rating - b.rating);
+      case 'helpful': return filtered.sort((a, b) => (b.helpful || 0) - (a.helpful || 0));
+      default: return filtered;
     }
   };
   const { addToCart, isInCart } = useCart();
@@ -269,6 +276,42 @@ export default function ProductDetailPage() {
               )}
             </div>
 
+            {/* Rating Filter */}
+            {reviews.length > 0 && (
+              <div className="mb-6">
+                <p className="text-sm font-medium text-surface-700 dark:text-surface-300 mb-3">Filter by Rating</p>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => setRatingFilter(null)}
+                    className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
+                      ratingFilter === null 
+                        ? 'bg-primary-600 text-white' 
+                        : 'bg-surface-100 dark:bg-surface-800 text-surface-600 dark:text-surface-400 hover:bg-surface-200 dark:hover:bg-surface-700'
+                    }`}
+                  >
+                    All ({reviews.length})
+                  </button>
+                  {[5, 4, 3, 2, 1].map(rating => {
+                    const count = reviews.filter(r => r.rating === rating).length;
+                    if (count === 0) return null;
+                    return (
+                      <button
+                        key={rating}
+                        onClick={() => setRatingFilter(ratingFilter === rating ? null : rating)}
+                        className={`px-3 py-1.5 text-sm rounded-lg transition-colors flex items-center gap-1 ${
+                          ratingFilter === rating 
+                            ? 'bg-yellow-500 text-white' 
+                            : 'bg-surface-100 dark:bg-surface-800 text-surface-600 dark:text-surface-400 hover:bg-surface-200 dark:hover:bg-surface-700'
+                        }`}
+                      >
+                        {rating} <Star size={12} className="fill-current" /> ({count})
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {/* Review Form */}
             <div className="bg-surface-50 dark:bg-surface-800 rounded-xl p-4 mb-6">
               <p className="text-sm font-medium text-surface-700 dark:text-surface-300 mb-3">Write a Review</p>
@@ -308,7 +351,7 @@ export default function ProductDetailPage() {
             {/* Reviews List */}
             <div className="space-y-4">
               {reviews.length > 0 ? (
-                getSortedReviews().map((review: any) => (
+                getFilteredAndSortedReviews().map((review: any) => (
                   <div key={review._id} className="bg-surface-50 dark:bg-surface-800 rounded-xl p-4">
                     <div className="flex items-center gap-3 mb-2">
                       <div className="w-10 h-10 bg-primary-100 dark:bg-primary-900/30 rounded-full flex items-center justify-center text-primary-600 font-bold">
