@@ -89,7 +89,6 @@ export default function Footer() {
       <div className="border-t border-surface-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <p className="text-sm text-surface-500">© {currentYear} Velora. All rights reserved.</p>
-          <p className="text-sm text-surface-500">Made with ❤️ in Pakistan</p>
         </div>
       </div>
     </footer>
