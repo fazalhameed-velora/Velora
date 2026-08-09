@@ -20,8 +20,21 @@ export default function ProductDetailPage() {
   const [selectedColor, setSelectedColor] = useState('');
   const [selectedStorage, setSelectedStorage] = useState('');
   const [reviews, setReviews] = useState<any[]>([]);
+  const [reviewSort, setReviewSort] = useState<'newest' | 'oldest' | 'highest' | 'lowest' | 'helpful'>('newest');
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
   const [submittingReview, setSubmittingReview] = useState(false);
+
+  const getSortedReviews = () => {
+    const sorted = [...reviews];
+    switch (reviewSort) {
+      case 'newest': return sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      case 'oldest': return sorted.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+      case 'highest': return sorted.sort((a, b) => b.rating - a.rating);
+      case 'lowest': return sorted.sort((a, b) => a.rating - b.rating);
+      case 'helpful': return sorted.sort((a, b) => (b.helpful || 0) - (a.helpful || 0));
+      default: return sorted;
+    }
+  };
   const { addToCart, isInCart } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
   const { addToRecentlyViewed } = useRecentlyViewed();
@@ -237,9 +250,24 @@ export default function ProductDetailPage() {
 
           {/* Reviews Section */}
           <div className="border-t border-surface-100 dark:border-surface-800 pt-6">
-            <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-4">
-              Customer Reviews ({reviews.length})
-            </h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-surface-900 dark:text-white">
+                Customer Reviews ({reviews.length})
+              </h3>
+              {reviews.length > 1 && (
+                <select
+                  value={reviewSort}
+                  onChange={(e) => setReviewSort(e.target.value as any)}
+                  className="px-3 py-1.5 text-sm border border-surface-200 dark:border-surface-700 rounded-lg bg-white dark:bg-surface-800 text-surface-700 dark:text-surface-300 focus:ring-2 focus:ring-primary-500"
+                >
+                  <option value="newest">Newest First</option>
+                  <option value="oldest">Oldest First</option>
+                  <option value="highest">Highest Rated</option>
+                  <option value="lowest">Lowest Rated</option>
+                  <option value="helpful">Most Helpful</option>
+                </select>
+              )}
+            </div>
 
             {/* Review Form */}
             <div className="bg-surface-50 dark:bg-surface-800 rounded-xl p-4 mb-6">
@@ -280,7 +308,7 @@ export default function ProductDetailPage() {
             {/* Reviews List */}
             <div className="space-y-4">
               {reviews.length > 0 ? (
-                reviews.map((review: any) => (
+                getSortedReviews().map((review: any) => (
                   <div key={review._id} className="bg-surface-50 dark:bg-surface-800 rounded-xl p-4">
                     <div className="flex items-center gap-3 mb-2">
                       <div className="w-10 h-10 bg-primary-100 dark:bg-primary-900/30 rounded-full flex items-center justify-center text-primary-600 font-bold">
