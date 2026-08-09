@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Plus, Edit, Trash2, Search, UserX, UserCheck, Shield, ShieldOff, MoreVertical, Eye, ShoppingBag, TrendingUp } from 'lucide-react';
 import { categoryAPI, brandAPI, couponAPI, bannerAPI, orderAPI, userAPI, productAPI } from '../../services/api';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { Category, Brand, Coupon, Banner } from '../../types';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
@@ -841,6 +842,20 @@ function AdminAnalytics() {
           .filter((o: any) => o.status !== 'cancelled')
           .reduce((sum: number, o: any) => sum + (o.total || 0), 0);
         
+        // Monthly sales data for chart
+        const monthlyData: Record<string, { revenue: number; orders: number }> = {};
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        orders.filter((o: any) => o.status !== 'cancelled').forEach((o: any) => {
+          const date = new Date(o.createdAt);
+          const key = `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
+          if (!monthlyData[key]) monthlyData[key] = { revenue: 0, orders: 0 };
+          monthlyData[key].revenue += o.total || 0;
+          monthlyData[key].orders += 1;
+        });
+        const monthlySales = Object.entries(monthlyData)
+          .map(([month, data]) => ({ month, ...data }))
+          .slice(-6); // Last 6 months
+        
         setData({
           totalRevenue,
           avgOrderValue,
@@ -852,6 +867,7 @@ function AdminAnalytics() {
           statusCounts,
           recentOrders: recentOrders.length,
           recentRevenue,
+          monthlySales,
         });
       } catch (e) { console.error(e); }
       finally { setLoading(false); }
@@ -962,6 +978,110 @@ function AdminAnalytics() {
               ))}
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Charts Section */}
+      <div className="grid lg:grid-cols-2 gap-6">
+        {/* Revenue Chart */}
+        <div className="bg-white dark:bg-surface-900 rounded-2xl border border-surface-100 dark:border-surface-800 p-6">
+          <h2 className="font-bold text-surface-900 dark:text-white mb-4">Revenue by Month</h2>
+          <div className="h-64">
+            {data.monthlySales.length === 0 ? (
+              <p className="text-sm text-surface-500 text-center py-8">No sales data yet</p>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={data.monthlySales}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis dataKey="month" tick={{ fontSize: 12 }} tickLine={false} />
+                  <YAxis tick={{ fontSize: 12 }} tickLine={false} />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#1f2937', border: 'none', borderRadius: '12px' }}
+                    itemStyle={{ color: '#f3f4f6' }}
+                    formatter={(value: any) => [`Rs. ${Number(value).toLocaleString()}`, 'Revenue']}
+                  />
+                  <Bar dataKey="revenue" fill="url(#gradient)" radius={[8, 8, 0, 0]} />
+                  <defs>
+                    <linearGradient id="gradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#5c7cfa" stopOpacity={1} />
+                      <stop offset="100%" stopColor="#364fc7" stopOpacity={0.8} />
+                    </linearGradient>
+                  </defs>
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+        </div>
+
+        {/* Orders by Status Pie Chart */}
+        <div className="bg-white dark:bg-surface-900 rounded-2xl border border-surface-100 dark:border-surface-800 p-6">
+          <h2 className="font-bold text-surface-900 dark:text-white mb-4">Orders by Status</h2>
+          <div className="h-64">
+            {Object.keys(data.statusCounts).length === 0 ? (
+              <p className="text-sm text-surface-500 text-center py-8">No orders yet</p>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={Object.entries(data.statusCounts).map(([status, count]) => ({
+                      name: status,
+                      value: count
+                    }))}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={90}
+                    paddingAngle={3}
+                    dataKey="value"
+                  >
+                    {Object.keys(data.statusCounts).map((status, index) => (
+                      <Cell 
+                        key={`cell-${index}`} 
+                        fill={
+                          status === 'delivered' ? '#22c55e' :
+                          status === 'pending' ? '#eab308' :
+                          status === 'cancelled' ? '#ef4444' :
+                          status === 'shipped' ? '#3b82f6' :
+                          status === 'confirmed' ? '#8b5cf6' :
+                          status === 'packed' ? '#06b6d4' :
+                          '#6b7280'
+                        } 
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#1f2937', border: 'none', borderRadius: '12px' }}
+                    itemStyle={{ color: '#f3f4f6' }}
+                  />
+                  <Legend 
+                    verticalAlign="bottom" 
+                    height={36}
+                    formatter={(value) => <span className="text-surface-600 dark:text-surface-400 capitalize">{value}</span>}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+              )}
+          </div>
+        </div>
+      </div>
+
+      {/* Top Products Bar Chart */}
+      <div className="bg-white dark:bg-surface-900 rounded-2xl border border-surface-100 dark:border-surface-800 p-6">
+        <h2 className="font-bold text-surface-900 dark:text-white mb-4">Top Products by Units Sold</h2>
+        <div className="h-72">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={data.topProducts} layout="vertical">
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" horizontal={false} />
+              <XAxis type="number" tick={{ fontSize: 12 }} tickLine={false} />
+              <YAxis dataKey="name" type="category" width={120} tick={{ fontSize: 12 }} tickLine={false} />
+              <Tooltip 
+                contentStyle={{ backgroundColor: '#1f2937', border: 'none', borderRadius: '12px' }}
+                itemStyle={{ color: '#f3f4f6' }}
+                formatter={(value: any) => [`${value} units`, 'Sold']}
+              />
+              <Bar dataKey="count" fill="#22c55e" radius={[0, 8, 8, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       </div>
 
