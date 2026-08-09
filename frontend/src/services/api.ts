@@ -196,6 +196,7 @@ export const productAPI = {
   update: (id: string, data: FormData) => api.put(`/products/${id}`, data, { headers: { 'Content-Type': 'multipart/form-data' } }),
   delete: (id: string) => api.delete(`/products/${id}`),
   getDashboard: () => api.get('/products/dashboard'),
+  autoTrending: (params?: Record<string, string>) => api.post('/products/auto-trending', null, { params }),
 };
 
 // Categories

@@ -4,6 +4,7 @@ const { protect, authorize } = require('../middleware/auth');
 const { upload, uploadProductImages } = require('../middleware/upload');
 
 router.get('/dashboard', protect, authorize('admin'), ctrl.getDashboardStats);
+router.post('/auto-trending', protect, authorize('admin'), ctrl.autoTrending);
 router.get('/', ctrl.getProducts);
 router.get('/:slug', ctrl.getProductBySlug);
 router.post('/', protect, authorize('admin'), upload.array('images', 10), uploadProductImages, ctrl.createProduct);

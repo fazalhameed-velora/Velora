@@ -141,3 +141,49 @@ exports.getDashboardStats = async (req, res, next) => {
     next(error);
   }
 };
+
+// Auto-flag products as trending based on soldCount
+exports.autoTrending = async (req, res, next) => {
+  try {
+    const { topN = 10, minSoldCount = 1 } = req.query;
+    const threshold = parseInt(topN) || 10;
+    const minSold = parseInt(minSoldCount) || 1;
+
+    // Get top N products by soldCount that have at least minSoldCount sales
+    const topProducts = await Product.find({ 
+      isActive: true, 
+      soldCount: { $gte: minSold } 
+    })
+      .sort({ soldCount: -1 })
+      .limit(threshold)
+      .select('_id name soldCount')
+      .lean();
+
+    const topIds = topProducts.map(p => p._id);
+
+    // Remove trending flag from ALL products first
+    await Product.updateMany(
+      { isTrending: true },
+      { isTrending: false }
+    );
+
+    // Set trending flag for top products
+    if (topIds.length > 0) {
+      await Product.updateMany(
+        { _id: { $in: topIds } },
+        { isTrending: true }
+      );
+    }
+
+    res.json({
+      success: true,
+      data: {
+        flagged: topIds.length,
+        products: topProducts.map(p => ({ name: p.name, soldCount: p.soldCount })),
+        message: `Top ${topIds.length} products flagged as trending`
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};

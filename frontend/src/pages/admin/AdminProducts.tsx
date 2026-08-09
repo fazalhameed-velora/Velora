@@ -104,11 +104,29 @@ export default function AdminProducts() {
     }
   };
 
+  const handleAutoTrending = async () => {
+    try {
+      const res: any = await productAPI.autoTrending({ topN: '10', minSoldCount: '1' });
+      const data = res.data;
+      notify.success('Auto-Trending Updated', { description: `${data.flagged} products flagged as trending based on sales.` });
+      // Reload products to reflect changes
+      const prods: any = await productAPI.getAll({ limit: '100' });
+      setProducts(prods.data || []);
+    } catch (e: any) {
+      notify.error('Failed', { description: e.message });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-surface-900 dark:text-white">Products ({products.length})</h1>
-        <Button onClick={() => openModal()}><Plus size={16} /> Add Product</Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={handleAutoTrending} className="hidden sm:flex">
+            <TrendingUp size={16} /> Auto-Trending
+          </Button>
+          <Button onClick={() => openModal()}><Plus size={16} /> Add Product</Button>
+        </div>
       </div>
 
       <Input placeholder="Search products..." icon={<Search size={16} />} value={search} onChange={(e) => setSearch(e.target.value)} />
