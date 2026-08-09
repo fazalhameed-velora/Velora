@@ -182,18 +182,17 @@ export default function ProductDetailPage() {
               <ShoppingCart size={18} />
               {isInCart(product._id) ? 'Update Cart' : 'Add to Cart'}
             </Button>
-            <Button
-              size="lg"
-              className="w-full sm:flex-1"
+            <button
+              className="w-full sm:flex-1 h-12 px-6 text-base font-semibold rounded-xl inline-flex items-center justify-center gap-2.5 bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white hover:from-orange-600 hover:via-red-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-red-500/30 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none"
               onClick={() => {
                 addToCart(product, quantity, selectedColor, selectedStorage);
                 window.location.href = '/checkout';
               }}
               disabled={product.stock === 0}
             >
-              <Zap size={18} />
+              <Zap size={18} className="animate-pulse" />
               Buy Now
-            </Button>
+            </button>
           </div>
           <div className="flex gap-3 mb-6">
             <button

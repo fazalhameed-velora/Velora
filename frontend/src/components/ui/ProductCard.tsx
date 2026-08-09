@@ -100,19 +100,17 @@ export default function ProductCard({ product, className }: ProductCardProps) {
             <ShoppingCart size={14} />
             {inCart ? 'In Cart' : 'Add to Cart'}
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full"
+          <button
+            className="w-full h-8 px-3 text-sm font-medium rounded-xl inline-flex items-center justify-center gap-1.5 bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white hover:from-orange-600 hover:via-red-600 hover:to-pink-600 transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-red-500/30 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
             onClick={(e) => {
               e.preventDefault();
               addToCart(product);
               navigate('/checkout');
             }}
           >
-            <Zap size={14} />
+            <Zap size={14} className="animate-pulse" />
             Buy Now
-          </Button>
+          </button>
         </div>
       </div>
     </div>
