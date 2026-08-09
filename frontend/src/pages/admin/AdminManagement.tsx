@@ -505,6 +505,8 @@ function AdminBanners() {
   const [editItem, setEditItem] = useState<Banner | null>(null);
   const [form, setForm] = useState({ title: '', subtitle: '', position: 'hero', startDate: '', endDate: '' });
   const [saving, setSaving] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const load = async () => { try { const res: any = await bannerAPI.getAll({ all: 'true' }); setBanners(res.data || []); } catch (e) { console.error(e); } };
   useEffect(() => { load(); }, []);
@@ -518,7 +520,23 @@ function AdminBanners() {
       startDate: item.startDate ? new Date(item.startDate).toISOString().split('T')[0] : '',
       endDate: item.endDate ? new Date(item.endDate).toISOString().split('T')[0] : ''
     } : { title: '', subtitle: '', position: 'hero', startDate: '', endDate: '' });
+    setImageFile(null);
+    setImagePreview(item?.image?.url || null);
     setShowModal(true);
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageFile(file);
+    const reader = new FileReader();
+    reader.onload = () => setImagePreview(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const removeImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
   };
 
   const getSchedulingStatus = (banner: Banner) => {
@@ -535,8 +553,15 @@ function AdminBanners() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      if (editItem) { await bannerAPI.update(editItem._id, form); notify.success('Banner Updated', { description: 'Banner has been updated.' }); }
-      else { await bannerAPI.create(form); notify.success('Banner Created', { description: 'New banner has been added.' }); }
+      const fd = new FormData();
+      if (form.title) fd.append('title', form.title);
+      if (form.subtitle) fd.append('subtitle', form.subtitle);
+      if (form.position) fd.append('position', form.position);
+      if (form.startDate) fd.append('startDate', form.startDate);
+      if (form.endDate) fd.append('endDate', form.endDate);
+      if (imageFile) fd.append('images', imageFile);
+      if (editItem) { await bannerAPI.update(editItem._id, fd); notify.success('Banner Updated', { description: 'Banner has been updated.' }); }
+      else { await bannerAPI.create(fd); notify.success('Banner Created', { description: 'New banner has been added.' }); }
       setShowModal(false); load();
     } catch (e: any) { notify.error('Operation Failed', { description: e.message }); } finally { setSaving(false); }
   };
@@ -566,9 +591,13 @@ function AdminBanners() {
           <div key={banner._id} className="bg-white dark:bg-surface-900 rounded-2xl border border-surface-100 dark:border-surface-800 p-5 hover:shadow-md transition-shadow duration-200">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className={`w-12 h-12 rounded-xl ${positionColors[banner.position] || 'bg-surface-100 text-surface-600'} flex items-center justify-center font-bold text-sm`}>
-                  {banner.title?.[0]?.toUpperCase() || 'B'}
-                </div>
+                {banner.image?.url ? (
+                  <img src={banner.image.url} alt={banner.title} className="w-16 h-12 object-cover rounded-lg border border-surface-200 dark:border-surface-700" />
+                ) : (
+                  <div className={`w-16 h-12 rounded-lg ${positionColors[banner.position] || 'bg-surface-100 text-surface-600'} flex items-center justify-center font-bold text-sm`}>
+                    {banner.title?.[0]?.toUpperCase() || 'B'}
+                  </div>
+                )}
                 <div>
                   <p className="font-medium text-surface-900 dark:text-white">{banner.title}</p>
                   <p className="text-sm text-surface-500">{banner.subtitle || 'No subtitle'}</p>
@@ -599,6 +628,40 @@ function AdminBanners() {
       </div>
       <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editItem ? 'Edit Banner' : 'Add Banner'}>
         <div className="space-y-4 sm:space-y-5">
+          {/* Image Upload */}
+          <div>
+            <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1.5">Banner Image</label>
+            {imagePreview ? (
+              <div className="relative">
+                <img src={imagePreview} alt="Banner preview" className="w-full h-40 object-cover rounded-xl border border-surface-200 dark:border-surface-700" />
+                <button 
+                  type="button" 
+                  onClick={removeImage}
+                  className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            ) : (
+              <label 
+                htmlFor="banner-upload"
+                className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-surface-300 dark:border-surface-600 rounded-xl cursor-pointer hover:border-primary-400 dark:hover:border-primary-500 transition-colors bg-surface-50 dark:bg-surface-800/50"
+              >
+                <input 
+                  type="file" 
+                  id="banner-upload"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="hidden"
+                />
+                <svg className="w-10 h-10 text-surface-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <p className="text-sm text-surface-500">Tap to upload banner image</p>
+                <p className="text-xs text-surface-400 mt-1">Recommended: 1200x400px</p>
+              </label>
+            )}
+          </div>
           <Input 
             label="Banner Title" 
             value={form.title} 

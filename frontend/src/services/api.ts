@@ -228,8 +228,8 @@ export const orderAPI = {
 // Banners
 export const bannerAPI = {
   getAll: (params?: Record<string, string>) => api.get('/banners', { params }),
-  create: (data: any) => api.post('/banners', data),
-  update: (id: string, data: any) => api.put(`/banners/${id}`, data),
+  create: (data: FormData) => api.post('/banners', data, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  update: (id: string, data: FormData) => api.put(`/banners/${id}`, data, { headers: { 'Content-Type': 'multipart/form-data' } }),
   delete: (id: string) => api.delete(`/banners/${id}`),
 };
 
