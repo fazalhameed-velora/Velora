@@ -141,6 +141,11 @@ export interface Banner {
   isActive: boolean;
   startDate?: string;
   endDate?: string;
+  // Analytics
+  clicks?: number;
+  impressions?: number;
+  lastClickedAt?: string;
+  lastImpressionAt?: string;
 }
 
 export interface Coupon {

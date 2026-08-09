@@ -63,3 +63,59 @@ exports.deleteBanner = async (req, res, next) => {
     next(error);
   }
 };
+
+// Track banner click
+exports.trackBannerClick = async (req, res, next) => {
+  try {
+    const banner = await Banner.findByIdAndUpdate(
+      req.params.id,
+      { $inc: { clicks: 1 }, lastClickedAt: new Date() },
+      { new: true }
+    );
+    if (!banner) return res.status(404).json({ success: false, message: 'Banner not found' });
+    res.json({ success: true, data: { clicks: banner.clicks } });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Track banner impression
+exports.trackBannerImpression = async (req, res, next) => {
+  try {
+    const { ids } = req.body;
+    if (!ids || !Array.isArray(ids)) {
+      return res.status(400).json({ success: false, message: 'Banner IDs required' });
+    }
+    await Banner.updateMany(
+      { _id: { $in: ids } },
+      { $inc: { impressions: 1 }, lastImpressionAt: new Date() }
+    );
+    res.json({ success: true });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Get banner analytics (admin)
+exports.getBannerAnalytics = async (req, res, next) => {
+  try {
+    const banners = await Banner.find({})
+      .select('title position clicks impressions lastClickedAt lastImpressionAt isActive')
+      .sort({ clicks: -1 })
+      .lean();
+    
+    const totalClicks = banners.reduce((sum, b) => sum + (b.clicks || 0), 0);
+    const totalImpressions = banners.reduce((sum, b) => sum + (b.impressions || 0), 0);
+    const clickRate = totalImpressions > 0 ? ((totalClicks / totalImpressions) * 100).toFixed(1) : 0;
+    
+    res.json({ 
+      success: true, 
+      data: { 
+        banners, 
+        summary: { totalClicks, totalImpressions, clickRate } 
+      } 
+    });
+  } catch (error) {
+    next(error);
+  }
+};

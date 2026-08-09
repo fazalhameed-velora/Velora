@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Plus, Edit, Trash2, Search, UserX, UserCheck, Shield, ShieldOff, MoreVertical, Eye, ShoppingBag, TrendingUp, Calendar } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, UserX, UserCheck, Shield, ShieldOff, MoreVertical, Eye, ShoppingBag, TrendingUp, Calendar, MousePointer, BarChart3 } from 'lucide-react';
 import { categoryAPI, brandAPI, couponAPI, bannerAPI, orderAPI, userAPI, productAPI } from '../../services/api';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { Category, Brand, Coupon, Banner } from '../../types';
@@ -577,6 +577,11 @@ function AdminBanners() {
     sidebar: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
   };
 
+  // Calculate summary stats
+  const totalImpressions = banners.reduce((sum, b) => sum + (b.impressions || 0), 0);
+  const totalClicks = banners.reduce((sum, b) => sum + (b.clicks || 0), 0);
+  const clickRate = totalImpressions > 0 ? ((totalClicks / totalImpressions) * 100).toFixed(1) : '0.0';
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -585,6 +590,37 @@ function AdminBanners() {
           <p className="text-sm text-surface-500 mt-1">{banners.length} banners total</p>
         </div>
         <Button onClick={() => openModal()}><Plus size={16} /> Add Banner</Button>
+      </div>
+      {/* Analytics Summary */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="bg-white dark:bg-surface-900 rounded-xl border border-surface-100 dark:border-surface-800 p-4">
+          <div className="flex items-center gap-2 text-surface-500 dark:text-surface-400 mb-1">
+            <Eye size={14} />
+            <span className="text-xs font-medium">Impressions</span>
+          </div>
+          <p className="text-xl font-bold text-surface-900 dark:text-white">{totalImpressions.toLocaleString()}</p>
+        </div>
+        <div className="bg-white dark:bg-surface-900 rounded-xl border border-surface-100 dark:border-surface-800 p-4">
+          <div className="flex items-center gap-2 text-surface-500 dark:text-surface-400 mb-1">
+            <MousePointer size={14} />
+            <span className="text-xs font-medium">Clicks</span>
+          </div>
+          <p className="text-xl font-bold text-surface-900 dark:text-white">{totalClicks.toLocaleString()}</p>
+        </div>
+        <div className="bg-white dark:bg-surface-900 rounded-xl border border-surface-100 dark:border-surface-800 p-4">
+          <div className="flex items-center gap-2 text-surface-500 dark:text-surface-400 mb-1">
+            <BarChart3 size={14} />
+            <span className="text-xs font-medium">Click Rate</span>
+          </div>
+          <p className="text-xl font-bold text-surface-900 dark:text-white">{clickRate}%</p>
+        </div>
+        <div className="bg-white dark:bg-surface-900 rounded-xl border border-surface-100 dark:border-surface-800 p-4">
+          <div className="flex items-center gap-2 text-surface-500 dark:text-surface-400 mb-1">
+            <TrendingUp size={14} />
+            <span className="text-xs font-medium">Active Banners</span>
+          </div>
+          <p className="text-xl font-bold text-surface-900 dark:text-white">{banners.filter(b => b.isActive).length}</p>
+        </div>
       </div>
       <div className="space-y-3">
         {banners.map(banner => (
@@ -601,16 +637,34 @@ function AdminBanners() {
                 <div>
                   <p className="font-medium text-surface-900 dark:text-white">{banner.title}</p>
                   <p className="text-sm text-surface-500">{banner.subtitle || 'No subtitle'}</p>
-                  {(banner.startDate || banner.endDate) && (
-                    <div className="flex items-center gap-1 mt-1">
-                      <Calendar size={12} className="text-surface-400" />
-                      <span className="text-xs text-surface-400">
-                        {banner.startDate ? new Date(banner.startDate).toLocaleDateString() : 'Now'}
-                        {' → '}
-                        {banner.endDate ? new Date(banner.endDate).toLocaleDateString() : 'No end'}
-                      </span>
+                  <div className="flex items-center gap-3 mt-1">
+                    {(banner.startDate || banner.endDate) && (
+                      <div className="flex items-center gap-1">
+                        <Calendar size={12} className="text-surface-400" />
+                        <span className="text-xs text-surface-400">
+                          {banner.startDate ? new Date(banner.startDate).toLocaleDateString() : 'Now'}
+                          {' → '}
+                          {banner.endDate ? new Date(banner.endDate).toLocaleDateString() : 'No end'}
+                        </span>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-1" title="Impressions">
+                        <Eye size={12} className="text-blue-400" />
+                        <span className="text-xs text-surface-400">{(banner.impressions || 0).toLocaleString()}</span>
+                      </div>
+                      <div className="flex items-center gap-1" title="Clicks">
+                        <MousePointer size={12} className="text-green-400" />
+                        <span className="text-xs text-surface-400">{(banner.clicks || 0).toLocaleString()}</span>
+                      </div>
+                      {(banner.clicks || 0) > 0 && (banner.impressions || 0) > 0 && (
+                        <div className="flex items-center gap-1" title="Click Rate">
+                          <BarChart3 size={12} className="text-purple-400" />
+                          <span className="text-xs text-surface-400">{(((banner.clicks || 0) / (banner.impressions || 1)) * 100).toFixed(1)}%</span>
+                        </div>
+                      )}
                     </div>
-                  )}
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-2">

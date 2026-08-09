@@ -27,6 +27,18 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const { items: recentlyViewed } = useRecentlyViewed();
 
+  // Track banner impressions when they load
+  useEffect(() => {
+    if (banners.length > 0) {
+      const bannerIds = banners.map(b => b._id);
+      bannerAPI.trackImpressions(bannerIds).catch(() => {}); // Fire and forget
+    }
+  }, [banners]);
+
+  const handleBannerClick = (bannerId: string) => {
+    bannerAPI.trackClick(bannerId).catch(() => {}); // Fire and forget
+  };
+
   useEffect(() => {
     const load = async () => {
       try {
@@ -271,11 +283,11 @@ export default function HomePage() {
                   <h2 className="text-2xl sm:text-3xl font-bold mb-3">{banner.title}</h2>
                   {banner.subtitle && <p className="text-primary-100 mb-6">{banner.subtitle}</p>}
                   {banner.link ? (
-                    <Link to={banner.link} className="inline-flex items-center gap-2 bg-white text-primary-700 px-6 py-3 rounded-xl font-semibold hover:bg-primary-50 transition-colors active:scale-[0.98]">
+                    <Link to={banner.link} onClick={() => handleBannerClick(banner._id)} className="inline-flex items-center gap-2 bg-white text-primary-700 px-6 py-3 rounded-xl font-semibold hover:bg-primary-50 transition-colors active:scale-[0.98]">
                       Shop Now <ArrowRight size={16} />
                     </Link>
                   ) : (
-                    <Link to="/shop" className="inline-flex items-center gap-2 bg-white text-primary-700 px-6 py-3 rounded-xl font-semibold hover:bg-primary-50 transition-colors active:scale-[0.98]">
+                    <Link to="/shop" onClick={() => handleBannerClick(banner._id)} className="inline-flex items-center gap-2 bg-white text-primary-700 px-6 py-3 rounded-xl font-semibold hover:bg-primary-50 transition-colors active:scale-[0.98]">
                       Shop Now <ArrowRight size={16} />
                     </Link>
                   )}

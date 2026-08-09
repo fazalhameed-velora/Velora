@@ -10,6 +10,11 @@ const bannerSchema = new mongoose.Schema({
   isActive: { type: Boolean, default: true },
   startDate: Date,
   endDate: Date,
+  // Analytics tracking
+  clicks: { type: Number, default: 0 },
+  impressions: { type: Number, default: 0 },
+  lastClickedAt: Date,
+  lastImpressionAt: Date,
 }, { timestamps: true });
 
 bannerSchema.index({ position: 1, isActive: 1, order: 1 });
