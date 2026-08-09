@@ -38,6 +38,7 @@ export default function OrderConfirmation() {
       <html>
       <head>
         <title>Order Receipt - Velora</title>
+        <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
         <style>
           body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 400px; margin: 0 auto; padding: 20px; color: #333; }
           .header { text-align: center; border-bottom: 2px solid #4c6ef5; padding-bottom: 15px; margin-bottom: 20px; }
@@ -46,6 +47,8 @@ export default function OrderConfirmation() {
           .order-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
           .label { color: #666; }
           .value { font-weight: 600; }
+          .barcode { text-align: center; margin: 20px 0; }
+          .barcode svg { max-width: 100%; }
           .delivery { background: #e7f5ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; }
           .delivery-title { color: #1971c2; font-weight: 600; margin-bottom: 5px; }
           .delivery-date { font-size: 18px; font-weight: bold; color: #1864ab; }
@@ -77,6 +80,10 @@ export default function OrderConfirmation() {
             <span class="label">Shipping:</span>
             <span class="value" style="color: #2f9e44;">Free</span>
           </div>
+        </div>
+        
+        <div class="barcode">
+          <svg id="barcode"></svg>
         </div>
         
         <div class="delivery">
@@ -140,7 +147,45 @@ export default function OrderConfirmation() {
       </html>
     `);
     printWindow.document.close();
-    printWindow.print();
+    
+    // Generate barcode after document is loaded
+    printWindow.onload = () => {
+      try {
+        if (printWindow.JsBarcode) {
+          printWindow.JsBarcode('#barcode', orderData?.orderId?.slice(-8).toUpperCase() || '00000000', {
+            format: 'CODE128',
+            width: 2,
+            height: 50,
+            displayValue: true,
+            fontSize: 14,
+            margin: 10,
+            background: '#ffffff',
+            lineColor: '#000000',
+          });
+        }
+        printWindow.print();
+      } catch (e) {
+        printWindow.print();
+      }
+    };
+    // Fallback if onload doesn't fire
+    setTimeout(() => {
+      try {
+        if (printWindow.JsBarcode && printWindow.document.getElementById('barcode')) {
+          printWindow.JsBarcode('#barcode', orderData?.orderId?.slice(-8).toUpperCase() || '00000000', {
+            format: 'CODE128',
+            width: 2,
+            height: 50,
+            displayValue: true,
+            fontSize: 14,
+            margin: 10,
+          });
+        }
+        printWindow.print();
+      } catch (e) {
+        printWindow.print();
+      }
+    }, 1000);
   };
 
   return (
