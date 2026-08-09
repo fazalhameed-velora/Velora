@@ -139,43 +139,113 @@ export default function AdminProducts() {
       </div>
 
       <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editProduct ? 'Edit Product' : 'Add Product'} size="lg">
-        <div className="space-y-4 max-h-[60vh] overflow-y-auto">
-          <Input label="Product Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+        <div className="space-y-4 sm:space-y-5">
+          {/* Product Name */}
+          <Input label="Product Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Enter product name" />
+          
+          {/* Description */}
           <div>
             <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1.5">Description</label>
-            <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} className="w-full px-3 py-2 rounded-xl border border-surface-300 dark:border-surface-700 bg-white dark:bg-surface-900 text-sm focus:ring-2 focus:ring-primary-500" />
+            <textarea 
+              value={form.description} 
+              onChange={(e) => setForm({ ...form, description: e.target.value })} 
+              rows={3} 
+              placeholder="Describe your product..."
+              className="w-full px-4 py-3 rounded-xl border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-900 text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all placeholder:text-surface-400"
+            />
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <Input label="Price (PKR)" type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
-            <Input label="Discount (%)" type="number" value={form.discount} onChange={(e) => setForm({ ...form, discount: e.target.value })} />
-            <Input label="Stock" type="number" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} />
-            <Input label="SKU" value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} />
+
+          {/* Pricing Section */}
+          <div className="bg-surface-50 dark:bg-surface-800 rounded-xl p-4">
+            <h3 className="text-sm font-semibold text-surface-700 dark:text-surface-300 mb-3">Pricing & Stock</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Input label="Price (PKR)" type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="0" />
+              <Input label="Discount (%)" type="number" value={form.discount} onChange={(e) => setForm({ ...form, discount: e.target.value })} placeholder="0" />
+              <Input label="Stock Quantity" type="number" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} placeholder="0" />
+              <Input label="SKU" value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} placeholder="Optional" />
+            </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+
+          {/* Category & Brand */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1.5">Category</label>
-              <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="w-full h-10 px-3 rounded-xl border border-surface-300 dark:border-surface-700 bg-white dark:bg-surface-900 text-sm">
+              <select 
+                value={form.category} 
+                onChange={(e) => setForm({ ...form, category: e.target.value })} 
+                className="w-full h-12 px-4 rounded-xl border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-900 text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+              >
                 <option value="">Select Category</option>
                 {categories.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
               </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1.5">Brand</label>
-              <select value={form.brand} onChange={(e) => setForm({ ...form, brand: e.target.value })} className="w-full h-10 px-3 rounded-xl border border-surface-300 dark:border-surface-700 bg-white dark:bg-surface-900 text-sm">
+              <select 
+                value={form.brand} 
+                onChange={(e) => setForm({ ...form, brand: e.target.value })} 
+                className="w-full h-12 px-4 rounded-xl border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-900 text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+              >
                 <option value="">Select Brand</option>
                 {brands.map(b => <option key={b._id} value={b._id}>{b.name}</option>)}
               </select>
             </div>
           </div>
-          <Input label="Tags (comma separated)" value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} placeholder="featured, trending, new-arrival" />
+
+          {/* Tags */}
+          <Input 
+            label="Tags" 
+            value={form.tags} 
+            onChange={(e) => setForm({ ...form, tags: e.target.value })} 
+            placeholder="featured, trending, new-arrival" 
+          />
+
+          {/* Image Upload */}
           <div>
-            <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1.5">Images</label>
-            <input type="file" multiple accept="image/*" onChange={(e) => setImages(Array.from(e.target.files || []))} className="w-full text-sm text-surface-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-medium file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100" />
+            <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">Product Images</label>
+            <div className="relative">
+              <input 
+                type="file" 
+                multiple 
+                accept="image/*" 
+                onChange={(e) => setImages(Array.from(e.target.files || []))} 
+                id="file-upload"
+                className="sr-only" 
+              />
+              <label 
+                htmlFor="file-upload"
+                className="flex flex-col items-center justify-center w-full h-32 sm:h-40 border-2 border-dashed border-surface-300 dark:border-surface-600 rounded-xl cursor-pointer hover:border-primary-400 dark:hover:border-primary-500 hover:bg-primary-50/50 dark:hover:bg-primary-900/10 transition-all"
+              >
+                <svg className="w-10 h-10 mb-2 text-surface-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <p className="text-sm font-medium text-surface-600 dark:text-surface-400">Tap to upload images</p>
+                <p className="text-xs text-surface-400 dark:text-surface-500 mt-1">PNG, JPG up to 10MB</p>
+              </label>
+            </div>
+            {images.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {images.map((file, i) => (
+                  <span key={i} className="inline-flex items-center gap-1 px-3 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 rounded-full text-xs font-medium">
+                    {file.name}
+                    <button onClick={() => setImages(images.filter((_, idx) => idx !== i))} className="ml-1 hover:text-primary-900">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
         </div>
-        <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-surface-100 dark:border-surface-800">
-          <Button variant="outline" onClick={() => setShowModal(false)}>Cancel</Button>
-          <Button onClick={handleSave} isLoading={saving}>{editProduct ? 'Update' : 'Create'}</Button>
+
+        {/* Action Buttons */}
+        <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 mt-6 pt-4 border-t border-surface-100 dark:border-surface-800">
+          <Button variant="outline" onClick={() => setShowModal(false)} className="w-full sm:w-auto justify-center">
+            Cancel
+          </Button>
+          <Button onClick={handleSave} isLoading={saving} className="w-full sm:w-auto justify-center">
+            {editProduct ? 'Update Product' : 'Create Product'}
+          </Button>
         </div>
       </Modal>
     </div>
