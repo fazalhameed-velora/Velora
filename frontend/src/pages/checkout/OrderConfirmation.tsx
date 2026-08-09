@@ -84,6 +84,44 @@ export default function OrderConfirmation() {
           <div class="delivery-date">${getEstimatedDelivery()}</div>
         </div>
         
+        ${orderData?.items && orderData.items.length > 0 ? `
+        <div style="margin-bottom: 20px;">
+          <h3 style="margin: 0 0 10px 0; font-weight: 600; border-bottom: 1px solid #ddd; padding-bottom: 8px;">Order Items</h3>
+          <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+            <thead>
+              <tr style="background: #f8f9fa;">
+                <th style="text-align: left; padding: 8px 5px;">Item</th>
+                <th style="text-align: center; padding: 8px 5px;">Qty</th>
+                <th style="text-align: right; padding: 8px 5px;">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${orderData.items.map((item: any) => `
+                <tr style="border-bottom: 1px solid #eee;">
+                  <td style="padding: 8px 5px;">${item.name || 'Product'}</td>
+                  <td style="text-align: center; padding: 8px 5px;">${item.quantity}</td>
+                  <td style="text-align: right; padding: 8px 5px;">Rs. ${((item.price || 0) * (item.quantity || 1)).toLocaleString()}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          <div style="margin-top: 10px; padding-top: 10px; border-top: 2px solid #4c6ef5;">
+            <div class="order-row">
+              <span class="label">Subtotal:</span>
+              <span class="value">Rs. ${orderData.items.reduce((sum: number, item: any) => sum + ((item.price || 0) * (item.quantity || 1)), 0).toLocaleString()}</span>
+            </div>
+            <div class="order-row">
+              <span class="label">Shipping:</span>
+              <span class="value" style="color: #2f9e44;">Free</span>
+            </div>
+            <div class="order-row" style="font-size: 16px; margin-top: 5px;">
+              <span class="label" style="font-weight: 600;">Total:</span>
+              <span class="value" style="color: #4c6ef5;">Rs. ${orderData.total?.toLocaleString() || orderData.items.reduce((sum: number, item: any) => sum + ((item.price || 0) * (item.quantity || 1)), 0).toLocaleString()}</span>
+            </div>
+          </div>
+        </div>
+        ` : ''}
+        
         <div style="background: #f0f0f0; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
           <p style="margin: 0 0 10px 0; font-weight: 600;">What's Next:</p>
           <ul style="margin: 0; padding-left: 20px; color: #555;">
