@@ -41,8 +41,8 @@ export default function Footer() {
 </Link>
             <p className="text-sm text-surface-400 mb-4">Your one-stop shop for the latest tech accessories and gadgets.</p>
             <div className="flex flex-col gap-2 text-sm text-surface-400">
-              <div className="flex items-center gap-2"><Phone size={14} /> +92 312 456789</div>
-              <div className="flex items-center gap-2"><Mail size={14} /> velora@gmail.com</div>
+              <div className="flex items-center gap-2"><Phone size={14} /> +92 307 0528980</div>
+              <div className="flex items-center gap-2"><Mail size={14} /> faizhameed521@gmail.com</div>
               <div className="flex items-center gap-2"><MapPin size={14} /> Karachi, Pakistan</div>
             </div>
           </div>
