@@ -99,13 +99,27 @@ function AdminCategories() {
         </div>
       </div>
       <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editItem ? 'Edit Category' : 'Add Category'}>
-        <div className="space-y-4">
-          <Input label="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-          <Input label="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+        <div className="space-y-4 sm:space-y-5">
+          <Input 
+            label="Category Name" 
+            value={form.name} 
+            onChange={(e) => setForm({ ...form, name: e.target.value })} 
+            placeholder="Enter category name"
+          />
+          <div>
+            <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1.5">Description</label>
+            <textarea 
+              value={form.description} 
+              onChange={(e) => setForm({ ...form, description: e.target.value })} 
+              rows={3}
+              placeholder="Describe this category..."
+              className="w-full px-4 py-3 rounded-xl border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-900 text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all placeholder:text-surface-400"
+            />
+          </div>
         </div>
-        <div className="flex justify-end gap-3 mt-6">
-          <Button variant="outline" onClick={() => setShowModal(false)}>Cancel</Button>
-          <Button onClick={handleSave} isLoading={saving}>{editItem ? 'Update' : 'Create'}</Button>
+        <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 mt-6 pt-4 border-t border-surface-100 dark:border-surface-800">
+          <Button variant="outline" onClick={() => setShowModal(false)} className="w-full sm:w-auto justify-center">Cancel</Button>
+          <Button onClick={handleSave} isLoading={saving} className="w-full sm:w-auto justify-center">{editItem ? 'Update Category' : 'Create Category'}</Button>
         </div>
       </Modal>
     </div>
@@ -188,13 +202,27 @@ function AdminBrands() {
         </div>
       </div>
       <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editItem ? 'Edit Brand' : 'Add Brand'}>
-        <div className="space-y-4">
-          <Input label="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-          <Input label="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+        <div className="space-y-4 sm:space-y-5">
+          <Input 
+            label="Brand Name" 
+            value={form.name} 
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            placeholder="Enter brand name"
+          />
+          <div>
+            <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1.5">Description</label>
+            <textarea 
+              value={form.description} 
+              onChange={(e) => setForm({ ...form, description: e.target.value })} 
+              rows={3}
+              placeholder="Describe this brand..."
+              className="w-full px-4 py-3 rounded-xl border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-900 text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all placeholder:text-surface-400"
+            />
+          </div>
         </div>
-        <div className="flex justify-end gap-3 mt-6">
-          <Button variant="outline" onClick={() => setShowModal(false)}>Cancel</Button>
-          <Button onClick={handleSave} isLoading={saving}>{editItem ? 'Update' : 'Create'}</Button>
+        <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 mt-6 pt-4 border-t border-surface-100 dark:border-surface-800">
+          <Button variant="outline" onClick={() => setShowModal(false)} className="w-full sm:w-auto justify-center">Cancel</Button>
+          <Button onClick={handleSave} isLoading={saving} className="w-full sm:w-auto justify-center">{editItem ? 'Update Brand' : 'Create Brand'}</Button>
         </div>
       </Modal>
     </div>
@@ -395,28 +423,76 @@ function AdminCoupons() {
         </div>
       </div>
       <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editItem ? 'Edit Coupon' : 'Add Coupon'}>
-        <div className="space-y-4">
-          <Input label="Code" value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })} />
-          <Input label="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1.5">Type</label>
-              <select value={form.discountType} onChange={(e) => setForm({ ...form, discountType: e.target.value })} className="w-full h-10 px-3 rounded-xl border border-surface-300 dark:border-surface-700 bg-white dark:bg-surface-900 text-sm">
-                <option value="percentage">Percentage</option>
-                <option value="fixed">Fixed Amount</option>
-              </select>
+        <div className="space-y-4 sm:space-y-5">
+          <Input 
+            label="Coupon Code" 
+            value={form.code} 
+            onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })} 
+            placeholder="e.g., SUMMER20"
+          />
+          <Input 
+            label="Description" 
+            value={form.description} 
+            onChange={(e) => setForm({ ...form, description: e.target.value })} 
+            placeholder="Optional description"
+          />
+          
+          {/* Discount Section */}
+          <div className="bg-surface-50 dark:bg-surface-800 rounded-xl p-4">
+            <h3 className="text-sm font-semibold text-surface-700 dark:text-surface-300 mb-3">Discount Settings</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1.5">Type</label>
+                <select 
+                  value={form.discountType} 
+                  onChange={(e) => setForm({ ...form, discountType: e.target.value })} 
+                  className="w-full h-12 px-4 rounded-xl border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-900 text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                >
+                  <option value="percentage">Percentage</option>
+                  <option value="fixed">Fixed Amount</option>
+                </select>
+              </div>
+              <Input 
+                label="Discount Value" 
+                type="number" 
+                value={form.discountValue} 
+                onChange={(e) => setForm({ ...form, discountValue: e.target.value })} 
+                placeholder="0"
+              />
             </div>
-            <Input label="Discount Value" type="number" value={form.discountValue} onChange={(e) => setForm({ ...form, discountValue: e.target.value })} />
           </div>
-          <div className="grid grid-cols-3 gap-4">
-            <Input label="Min Purchase" type="number" value={form.minPurchase} onChange={(e) => setForm({ ...form, minPurchase: e.target.value })} />
-            <Input label="Max Discount" type="number" value={form.maxDiscount} onChange={(e) => setForm({ ...form, maxDiscount: e.target.value })} />
-            <Input label="Usage Limit" type="number" value={form.usageLimit} onChange={(e) => setForm({ ...form, usageLimit: e.target.value })} />
+
+          {/* Limits Section */}
+          <div className="bg-surface-50 dark:bg-surface-800 rounded-xl p-4">
+            <h3 className="text-sm font-semibold text-surface-700 dark:text-surface-300 mb-3">Limits & Restrictions</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <Input 
+                label="Min Purchase" 
+                type="number" 
+                value={form.minPurchase} 
+                onChange={(e) => setForm({ ...form, minPurchase: e.target.value })} 
+                placeholder="0"
+              />
+              <Input 
+                label="Max Discount" 
+                type="number" 
+                value={form.maxDiscount} 
+                onChange={(e) => setForm({ ...form, maxDiscount: e.target.value })} 
+                placeholder="Optional"
+              />
+              <Input 
+                label="Usage Limit" 
+                type="number" 
+                value={form.usageLimit} 
+                onChange={(e) => setForm({ ...form, usageLimit: e.target.value })} 
+                placeholder="Unlimited"
+              />
+            </div>
           </div>
         </div>
-        <div className="flex justify-end gap-3 mt-6">
-          <Button variant="outline" onClick={() => setShowModal(false)}>Cancel</Button>
-          <Button onClick={handleSave} isLoading={saving}>{editItem ? 'Update' : 'Create'}</Button>
+        <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 mt-6 pt-4 border-t border-surface-100 dark:border-surface-800">
+          <Button variant="outline" onClick={() => setShowModal(false)} className="w-full sm:w-auto justify-center">Cancel</Button>
+          <Button onClick={handleSave} isLoading={saving} className="w-full sm:w-auto justify-center">{editItem ? 'Update Coupon' : 'Create Coupon'}</Button>
         </div>
       </Modal>
     </div>
@@ -493,21 +569,35 @@ function AdminBanners() {
         ))}
       </div>
       <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editItem ? 'Edit Banner' : 'Add Banner'}>
-        <div className="space-y-4">
-          <Input label="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
-          <Input label="Subtitle" value={form.subtitle} onChange={(e) => setForm({ ...form, subtitle: e.target.value })} />
+        <div className="space-y-4 sm:space-y-5">
+          <Input 
+            label="Banner Title" 
+            value={form.title} 
+            onChange={(e) => setForm({ ...form, title: e.target.value })} 
+            placeholder="Enter banner title"
+          />
+          <Input 
+            label="Subtitle" 
+            value={form.subtitle} 
+            onChange={(e) => setForm({ ...form, subtitle: e.target.value })} 
+            placeholder="Optional subtitle"
+          />
           <div>
             <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1.5">Position</label>
-            <select value={form.position} onChange={(e) => setForm({ ...form, position: e.target.value })} className="w-full h-10 px-3 rounded-xl border border-surface-300 dark:border-surface-700 bg-white dark:bg-surface-900 text-sm">
-              <option value="hero">Hero</option>
-              <option value="promo">Promo</option>
+            <select 
+              value={form.position} 
+              onChange={(e) => setForm({ ...form, position: e.target.value })} 
+              className="w-full h-12 px-4 rounded-xl border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-900 text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+            >
+              <option value="hero">Hero (Homepage top)</option>
+              <option value="promo">Promo (Content section)</option>
               <option value="sidebar">Sidebar</option>
             </select>
           </div>
         </div>
-        <div className="flex justify-end gap-3 mt-6">
-          <Button variant="outline" onClick={() => setShowModal(false)}>Cancel</Button>
-          <Button onClick={handleSave} isLoading={saving}>{editItem ? 'Update' : 'Create'}</Button>
+        <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 mt-6 pt-4 border-t border-surface-100 dark:border-surface-800">
+          <Button variant="outline" onClick={() => setShowModal(false)} className="w-full sm:w-auto justify-center">Cancel</Button>
+          <Button onClick={handleSave} isLoading={saving} className="w-full sm:w-auto justify-center">{editItem ? 'Update Banner' : 'Create Banner'}</Button>
         </div>
       </Modal>
     </div>
@@ -734,7 +824,7 @@ function AdminUsers() {
       {/* Edit User Modal */}
       <Modal isOpen={showEditModal} onClose={() => setShowEditModal(false)} title="Edit User">
         {selectedUser && (
-          <div className="space-y-4">
+          <div className="space-y-4 sm:space-y-5">
             <div className="flex items-center gap-4 p-4 bg-surface-50 dark:bg-surface-800 rounded-xl">
               <div className="w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-600 font-bold text-lg">
                 {selectedUser.name?.[0]?.toUpperCase() || 'U'}
@@ -744,13 +834,18 @@ function AdminUsers() {
                 <p className="text-sm text-surface-500">{selectedUser.email}</p>
               </div>
             </div>
-            <Input label="Name" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
+            <Input 
+              label="Name" 
+              value={editForm.name} 
+              onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} 
+              placeholder="Enter user name"
+            />
             <div>
               <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1.5">Role</label>
               <select
                 value={editForm.role}
                 onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}
-                className="w-full h-10 px-3 rounded-xl border border-surface-300 dark:border-surface-700 bg-white dark:bg-surface-900 text-sm"
+                className="w-full h-12 px-4 rounded-xl border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-900 text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
               >
                 <option value="user">User</option>
                 <option value="admin">Admin</option>
@@ -758,9 +853,9 @@ function AdminUsers() {
             </div>
           </div>
         )}
-        <div className="flex justify-end gap-3 mt-6">
-          <Button variant="outline" onClick={() => setShowEditModal(false)}>Cancel</Button>
-          <Button onClick={handleUpdateUser} isLoading={saving}>Update User</Button>
+        <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 mt-6 pt-4 border-t border-surface-100 dark:border-surface-800">
+          <Button variant="outline" onClick={() => setShowEditModal(false)} className="w-full sm:w-auto justify-center">Cancel</Button>
+          <Button onClick={handleUpdateUser} isLoading={saving} className="w-full sm:w-auto justify-center">Update User</Button>
         </div>
       </Modal>
 
@@ -768,16 +863,20 @@ function AdminUsers() {
       <Modal isOpen={showDeleteModal} onClose={() => setShowDeleteModal(false)} title="Delete User">
         {selectedUser && (
           <div className="space-y-4">
-            <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800">
-              <p className="text-sm text-red-600 dark:text-red-400">
-                Are you sure you want to delete <strong>{selectedUser.name}</strong>? This will permanently remove their account and all associated data.
-              </p>
+            <div className="flex items-center gap-3 p-4 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800">
+              <svg className="w-6 h-6 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <div>
+                <p className="font-medium text-red-600 dark:text-red-400">Warning: This action cannot be undone</p>
+                <p className="text-sm text-red-500/80">{selectedUser.name}'s account and all data will be permanently deleted.</p>
+              </div>
             </div>
           </div>
         )}
-        <div className="flex justify-end gap-3 mt-6">
-          <Button variant="outline" onClick={() => setShowDeleteModal(false)}>Cancel</Button>
-          <Button variant="danger" onClick={handleDeleteUser} isLoading={saving}>
+        <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 mt-6 pt-4 border-t border-surface-100 dark:border-surface-800">
+          <Button variant="outline" onClick={() => setShowDeleteModal(false)} className="w-full sm:w-auto justify-center">Cancel</Button>
+          <Button variant="danger" onClick={handleDeleteUser} isLoading={saving} className="w-full sm:w-auto justify-center">
             <Trash2 size={16} /> Delete User
           </Button>
         </div>
