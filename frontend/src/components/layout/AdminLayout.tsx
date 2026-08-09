@@ -34,7 +34,7 @@ function AdminSidebar({ open, setOpen }: { open: boolean; setOpen: (v: boolean) 
             </div>
             <span className="font-bold text-surface-900 dark:text-white">Admin</span>
           </Link>
-          <button onClick={() => setOpen(false)} className="p-1.5 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-800 lg:hidden">
+          <button onClick={() => setOpen(false)} className="p-1.5 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-800 lg:hidden text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-surface-200 transition-colors">
             <ChevronLeft size={16} />
           </button>
         </div>
@@ -64,7 +64,7 @@ export default function AdminLayout() {
       <AdminSidebar open={sidebarOpen} setOpen={setSidebarOpen} />
       <div className="lg:ml-64">
         <header className="sticky top-0 z-30 h-14 bg-white/80 dark:bg-surface-900/80 backdrop-blur-md border-b border-surface-200 dark:border-surface-800 flex items-center px-4 gap-4">
-          <button onClick={() => setSidebarOpen(true)} className="p-2 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-800 lg:hidden">
+          <button onClick={() => setSidebarOpen(true)} className="p-2 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-800 lg:hidden text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-surface-200 transition-colors">
             <Menu size={18} />
           </button>
           <div className="flex-1" />
