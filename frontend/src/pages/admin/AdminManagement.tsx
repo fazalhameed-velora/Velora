@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Plus, Edit, Trash2, Search, UserX, UserCheck, Shield, ShieldOff, MoreVertical, Eye, ShoppingBag, TrendingUp } from 'lucide-react';
-import { categoryAPI, brandAPI, couponAPI, bannerAPI, orderAPI, userAPI } from '../../services/api';
+import { categoryAPI, brandAPI, couponAPI, bannerAPI, orderAPI, userAPI, productAPI } from '../../services/api';
 import { Category, Brand, Coupon, Banner } from '../../types';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
@@ -786,20 +786,201 @@ function AdminUsers() {
 }
 
 function AdminAnalytics() {
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [period, setPeriod] = useState('all');
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const [ordersRes, productsRes, usersRes]: any[] = await Promise.all([
+          orderAPI.getAll({ limit: '500' }),
+          productAPI.getAll({ limit: '500' }),
+          userAPI.getAll({ limit: '500' }),
+        ]);
+        
+        const orders = ordersRes.data || [];
+        const products = productsRes.data || [];
+        const users = usersRes.data || [];
+        
+        // Calculate analytics
+        const totalRevenue = orders
+          .filter((o: any) => o.status !== 'cancelled')
+          .reduce((sum: number, o: any) => sum + (o.total || 0), 0);
+        
+        const avgOrderValue = orders.length > 0 ? totalRevenue / orders.filter((o: any) => o.status !== 'cancelled').length : 0;
+        
+        const deliveredOrders = orders.filter((o: any) => o.status === 'delivered').length;
+        const conversionRate = orders.length > 0 ? (deliveredOrders / orders.length) * 100 : 0;
+        
+        // Top selling products
+        const productSales: Record<string, { name: string; count: number; revenue: number }> = {};
+        orders.forEach((order: any) => {
+          order.items?.forEach((item: any) => {
+            const id = item.product || item.name;
+            if (!productSales[id]) productSales[id] = { name: item.name, count: 0, revenue: 0 };
+            productSales[id].count += item.quantity;
+            productSales[id].revenue += item.price * item.quantity;
+          });
+        });
+        const topProducts = Object.values(productSales)
+          .sort((a, b) => b.revenue - a.revenue)
+          .slice(0, 5);
+        
+        // Orders by status
+        const statusCounts: Record<string, number> = {};
+        orders.forEach((o: any) => {
+          statusCounts[o.status] = (statusCounts[o.status] || 0) + 1;
+        });
+        
+        // Recent activity (last 7 days)
+        const weekAgo = new Date();
+        weekAgo.setDate(weekAgo.getDate() - 7);
+        const recentOrders = orders.filter((o: any) => new Date(o.createdAt) > weekAgo);
+        const recentRevenue = recentOrders
+          .filter((o: any) => o.status !== 'cancelled')
+          .reduce((sum: number, o: any) => sum + (o.total || 0), 0);
+        
+        setData({
+          totalRevenue,
+          avgOrderValue,
+          conversionRate,
+          totalOrders: orders.length,
+          totalProducts: products.length,
+          totalUsers: users.length,
+          topProducts,
+          statusCounts,
+          recentOrders: recentOrders.length,
+          recentRevenue,
+        });
+      } catch (e) { console.error(e); }
+      finally { setLoading(false); }
+    };
+    load();
+  }, [period]);
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="h-8 w-40 skeleton rounded-lg" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => <div key={i} className="h-32 skeleton rounded-2xl" />)}
+        </div>
+        <div className="h-64 skeleton rounded-2xl" />
+      </div>
+    );
+  }
+
+  if (!data) return null;
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-surface-900 dark:text-white">Analytics</h1>
-        <p className="text-sm text-surface-500 mt-1">Detailed analytics and insights coming soon.</p>
-      </div>
-      <div className="bg-white dark:bg-surface-900 rounded-2xl border border-surface-100 dark:border-surface-800 p-8 text-center">
-        <div className="w-16 h-16 mx-auto mb-4 bg-primary-50 dark:bg-primary-900/20 rounded-2xl flex items-center justify-center">
-          <TrendingUp size={32} className="text-primary-500" />
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-surface-900 dark:text-white">Analytics</h1>
+          <p className="text-sm text-surface-500 mt-1">Comprehensive insights into your store performance</p>
         </div>
-        <h3 className="text-lg font-bold text-surface-900 dark:text-white mb-2">Analytics Dashboard</h3>
-        <p className="text-surface-500 max-w-md mx-auto">
-          Comprehensive analytics including sales trends, customer insights, conversion rates, and more will be available here soon.
-        </p>
+        <select
+          value={period}
+          onChange={(e) => setPeriod(e.target.value)}
+          className="h-10 px-4 rounded-xl border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-900 text-sm font-medium"
+        >
+          <option value="all">All Time</option>
+          <option value="7d">Last 7 Days</option>
+          <option value="30d">Last 30 Days</option>
+        </select>
+      </div>
+
+      {/* Key Metrics */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          { label: 'Total Revenue', value: `Rs. ${data.totalRevenue.toLocaleString()}`, icon: TrendingUp, gradient: 'from-green-500 to-emerald-600' },
+          { label: 'Avg Order Value', value: `Rs. ${Math.round(data.avgOrderValue).toLocaleString()}`, icon: ShoppingBag, gradient: 'from-primary-500 to-primary-600' },
+          { label: 'Conversion Rate', value: `${data.conversionRate.toFixed(1)}%`, icon: TrendingUp, gradient: 'from-blue-500 to-indigo-600' },
+          { label: 'Recent Orders (7d)', value: data.recentOrders.toString(), icon: ShoppingBag, gradient: 'from-purple-500 to-violet-600' },
+        ].map((stat, i) => (
+          <div key={i} className="bg-white dark:bg-surface-900 rounded-2xl border border-surface-100 dark:border-surface-800 p-5">
+            <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.gradient} flex items-center justify-center text-white shadow-lg mb-4`}>
+              <stat.icon size={22} />
+            </div>
+            <p className="text-sm text-surface-500 mb-1">{stat.label}</p>
+            <p className="text-2xl font-bold text-surface-900 dark:text-white">{stat.value}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid lg:grid-cols-2 gap-6">
+        {/* Top Products */}
+        <div className="bg-white dark:bg-surface-900 rounded-2xl border border-surface-100 dark:border-surface-800 p-6">
+          <h2 className="font-bold text-surface-900 dark:text-white mb-4">Top Selling Products</h2>
+          {data.topProducts.length === 0 ? (
+            <p className="text-sm text-surface-500 text-center py-8">No sales data yet</p>
+          ) : (
+            <div className="space-y-3">
+              {data.topProducts.map((product: any, i: number) => (
+                <div key={i} className="flex items-center justify-between p-3 rounded-xl hover:bg-surface-50 dark:hover:bg-surface-800/50">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold ${
+                      i === 0 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                      i === 1 ? 'bg-surface-200 text-surface-600 dark:bg-surface-700 dark:text-surface-300' :
+                      'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
+                    }`}>
+                      #{i + 1}
+                    </div>
+                    <span className="text-sm font-medium text-surface-900 dark:text-white truncate max-w-[150px]">{product.name}</span>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-bold text-surface-900 dark:text-white">Rs. {product.revenue.toLocaleString()}</p>
+                    <p className="text-xs text-surface-500">{product.count} sold</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Orders by Status */}
+        <div className="bg-white dark:bg-surface-900 rounded-2xl border border-surface-100 dark:border-surface-800 p-6">
+          <h2 className="font-bold text-surface-900 dark:text-white mb-4">Orders by Status</h2>
+          {Object.keys(data.statusCounts).length === 0 ? (
+            <p className="text-sm text-surface-500 text-center py-8">No orders yet</p>
+          ) : (
+            <div className="space-y-3">
+              {Object.entries(data.statusCounts).map(([status, count]: [string, any]) => (
+                <div key={status} className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Badge variant={
+                      status === 'delivered' ? 'success' :
+                      status === 'cancelled' ? 'danger' :
+                      status === 'pending' ? 'warning' : 'info'
+                    }>
+                      {status}
+                    </Badge>
+                  </div>
+                  <span className="text-sm font-bold text-surface-900 dark:text-white">{count}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Summary Stats */}
+      <div className="bg-white dark:bg-surface-900 rounded-2xl border border-surface-100 dark:border-surface-800 p-6">
+        <h2 className="font-bold text-surface-900 dark:text-white mb-4">Store Overview</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {[
+            { label: 'Total Orders', value: data.totalOrders },
+            { label: 'Total Products', value: data.totalProducts },
+            { label: 'Total Users', value: data.totalUsers },
+            { label: 'Recent Revenue (7d)', value: `Rs. ${data.recentRevenue.toLocaleString()}` },
+          ].map((stat, i) => (
+            <div key={i} className="text-center p-4 bg-surface-50 dark:bg-surface-800 rounded-xl">
+              <p className="text-2xl font-bold text-surface-900 dark:text-white">{stat.value}</p>
+              <p className="text-xs text-surface-500 mt-1">{stat.label}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
